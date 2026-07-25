@@ -41,7 +41,8 @@ export async function getRoots()
     return await stream.toArray();
 }
 
-export async function getIsolated()
+// Renvoie les tags uniques
+export async function getUniques()
 {
     const   query = `
         PREFIX owl: <http://www.w3.org/2002/07/owl#>
