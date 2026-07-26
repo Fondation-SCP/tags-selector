@@ -81,6 +81,8 @@ vêtements -> vêtement
 vibration poubelle
 (sugg : informatique ou biologique pour virus)
 vulpes poubelle
+shell poubelle
+bonifay poubelle
 
 ATENTION <500 nulach -> moins-500
 
@@ -114,3 +116,35 @@ Comment créer un tag univers :
 3) Préférer préfixer le tag pour le donner en entier : site-aleph, dr-holt, concours-14ansfr
 
 AUTRE : Passer les transitions en offset au lieu de pages à côté
+
+Pour les tags d'univers : 
+- Ils sont ajoutés à la liste au bout de 5 écrits
+- En attendant de les avoir, ils peuvent être ajoutés à la page avec un _ devant
+- Pas de portail tant que le tag est en invisible
+- DEMANDER A STY de lister tous les tags qui ont - de 5 occurences + ajouter des _ au cas par cas
+- DEMANDER A STY de check les tags univers via scrapping comparé avec EN
+-DEMANDER A STY la liste des tags de merde ajoutés à l'arrache et qui sont pas dans le guide
+
+
+tags d'univers à under/rename : 
+site-31-zh
+esterberg
+accélérer-le-futur
+avelar
+et-maintenant-on-est-cool -> emoec
+gru -> gru-p
+maîtrise-des-foyers -> dpt-maîtrise-des-foyers
+manne -> fcm
+media-westhead
+prometheus -> laboratoires-prometheus 
+tranche-de-porc
+blackwood -> lord-blackwood
+cargaisons-insolites
+greazeburger
+loge-noire-du-chasseur
+nornir-de-silicone -> nornes-de-silicium (et à _)
+professeur-aw
+le-refuge-d-en-haut -> refuge-d-en-haut
+sans-nom -> sans-noms
+sugarcomb -> _confiserie-sugarcomb
+
