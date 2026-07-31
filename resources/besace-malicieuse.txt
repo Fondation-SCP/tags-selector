@@ -147,4 +147,10 @@ professeur-aw
 le-refuge-d-en-haut -> refuge-d-en-haut
 sans-nom -> sans-noms
 sugarcomb -> _confiserie-sugarcomb
-
+la-fin-de-la-mascarade -> fin-de-la-mascarade
+renouveau ????
+les-mots-des-narrateurs -> mots-des-narrateurs
+nouvelle-génération
+orgueil-et-supprimé
+introduction
+dessin-animé -> kids-show
