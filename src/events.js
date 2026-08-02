@@ -1,6 +1,6 @@
 import { app } from "./main.js";
 import { addTag, removeTag } from "./selection/tools.js";
-import { showDirectSubNodes, getAllSubNodes } from "./graph/tools.js";
+import { showDirectSubNodes, getAllSubNodes, updateLayout } from "./graph/tools.js";
 
 // Enregistrement des événements relatifs au graphe
 export function registerGraphEvents()
@@ -31,6 +31,9 @@ export function registerGraphEvents()
 
             // Affichage des sous noeuds de premier niveau
             showDirectSubNodes(node);
+
+            // Calcule la position des noeuds de façon cohérente et selon un layout
+            updateLayout();
         }
         else
         {
@@ -45,6 +48,7 @@ export function registerGraphEvents()
             {
                 removeTag(element.data().label);
 
+                element.connectedEdges().hide();
                 element.hide();
 
                 if (element.hasClass("selected"))

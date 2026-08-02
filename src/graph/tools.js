@@ -25,6 +25,7 @@ export async function addSubNodes(node)
         });
 
         // A rendre variable selon la configuration
+        newNode.connectedEdges().hide();
         newNode.hide();
 
         if (exists == true)
@@ -62,5 +63,28 @@ export function getAllSubNodes(node)
 // Afficher les sous noeuds de premier niveau d'un noeud
 export function showDirectSubNodes(node)
 {
+    node.outgoers("node").connectedEdges().show();
     node.outgoers("node").show();
+}
+
+// Met à jour l'affichage global selon le graphe mis à jour
+export function updateLayout()
+{
+    const   savedZoom = app.cy.zoom();
+    const   savedPan = app.cy.pan();
+
+    app.cy.layout({
+        name: "dagre",
+        rankDir: "TB",
+        ranker: "tight-tree",
+        nodeSep: 50,
+        rankSep: 100,
+        padding: 50,
+        animate: false,
+        fit: false,
+        eles: app.cy.elements(":visible")
+    }).run();
+
+    app.cy.zoom(savedZoom);
+    app.cy.pan(savedPan);
 }

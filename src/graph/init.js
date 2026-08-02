@@ -1,6 +1,6 @@
 import { app } from "../main.js";
 import { getSub, getRoots, getUniques } from "../database/get.js";
-import { addSubNodes } from "./tools.js";
+import { addSubNodes, updateLayout } from "./tools.js";
 import { printList } from "../database/tools.js";
 
 function initGraphBase()
@@ -110,12 +110,10 @@ async function initGraphNodes()
     }
 
     // Calcule la position des noeuds de façon cohérente et selon un layout
-    app.cy.layout
-    ({
-        name: "breadthfirst",
-        rows: 1,
-        padding: 0
-    }).run();
+    updateLayout();
+
+    // Centre la vision sur l'ensemble du graphe
+    app.cy.center(app.cy.nodes(":visible"));
 }
 
 export async function initGraph()
