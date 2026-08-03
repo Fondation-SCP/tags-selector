@@ -84,7 +84,7 @@ vulpes poubelle
 shell poubelle
 bonifay poubelle
 
-ATENTION <500 nulach -> moins-500
+ATENTION <500 nulach -> moins-de-500
 
 
 Pour le contenu original :
@@ -154,3 +154,9 @@ nouvelle-génération
 orgueil-et-supprimé
 introduction
 dessin-animé -> kids-show
+
+Faire un truc pour les casefiles de la CMO (???)
+Ne pas se tuer quand on fera le portail de la CMO 
+
+les tags de série à supprimer
+
