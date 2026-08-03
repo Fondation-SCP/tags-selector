@@ -85,6 +85,22 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#af2014 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#af2014">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°traduction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#af2016 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#af2016">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°traduction"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#agt-dears -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#agt-dears">
@@ -253,6 +269,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#art2017 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#art2017">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#aumn -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#aumn">
@@ -333,6 +357,118 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c10fr2022 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c10fr2022">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c11fr2023 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c11fr2023">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c12fr2024 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c12fr2024">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c13fr2025 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c13fr2025">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c14fr2026 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c14fr2026">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c2fr2014 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c2fr2014">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c3fr2015 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c3fr2015">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c404fr -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c404fr">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c4fr2016 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c4fr2016">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c5fr2017 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c5fr2017">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c6fr2018 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c6fr2018">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c8fr2020 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c8fr2020">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#c9fr2021 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#c9fr2021">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cag09 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cag09">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#caldeira -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#caldeira">
@@ -373,6 +509,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cd2014 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cd2014">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cerf-saturne -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cerf-saturne">
@@ -385,6 +529,38 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cfo">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#ch2012 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ch2012">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#ch2019 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ch2019">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#ch2022 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ch2022">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#ch2023 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ch2023">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -421,18 +597,18 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#chroniques-de-saphir -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#chroniques-de-saphir">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
-    </owl:Class>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cietu -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cietu">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cinq-questions -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cinq-questions">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -453,6 +629,22 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cliche2019 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cliche2019">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cma2014 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cma2014">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cmo -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cmo">
@@ -465,6 +657,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cn">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°traduction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cna2013 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cna2013">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -511,6 +711,38 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2018 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2018">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2019 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2019">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2020 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2020">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2021 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#con-jam2021">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#concours -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#concours">
@@ -519,10 +751,34 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#concours-gdi-es-2017 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#concours-gdi-es-2017">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#conhis2017 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#conhis2017">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#cs -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#cs">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°traduction"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#ct2013 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ct2013">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -539,6 +795,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#d-2108">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#d-con2016 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#d-con2016">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -684,14 +948,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#dossier">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#document"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#dottinghton -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#dottinghton">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
     </owl:Class>
     
 
@@ -953,14 +1209,6 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#désert-humain -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#désert-humain">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
-    </owl:Class>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#effroi-et-cirques -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#effroi-et-cirques">
@@ -1005,6 +1253,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#enfants-de-la-torche">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#enfer-insectoïde -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#enfer-insectoïde">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°canon"/>
     </owl:Class>
     
 
@@ -1113,6 +1369,22 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#fest173 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fest173">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#fim2016 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fim2016">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#fin-de-la-mascarade -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fin-de-la-mascarade">
@@ -1125,6 +1397,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fin-de-la-mort">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°canon"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#fin-du-monde2018 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fin-du-monde2018">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -1177,6 +1457,22 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#gdi2014 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#gdi2014">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#gdi2019 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#gdi2019">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#gendastrerie -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#gendastrerie">
@@ -1197,14 +1493,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#gentilshommes">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#gentleman-dream -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#gentleman-dream">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
     </owl:Class>
     
 
@@ -1261,6 +1549,30 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#h-canon">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°canon"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#halloween-19-de -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#halloween-19-de">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#halloween2018 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#halloween2018">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#halloweencon2022 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#halloweencon2022">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -1443,14 +1755,6 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#jacobusiers -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#jacobusiers">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
-    </owl:Class>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#jaune -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#jaune">
@@ -1503,14 +1807,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#keter">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#scp"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#kids-show -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#kids-show">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
     </owl:Class>
     
 
@@ -1707,14 +2003,6 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#minuit-moins-cinq -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#minuit-moins-cinq">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
-    </owl:Class>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#modèle -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#modèle">
@@ -1723,18 +2011,18 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#monde-merveilleux -->
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#moins-de-500 -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#monde-merveilleux">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°canon"/>
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#moins-de-500">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#mots-des-narrateurs -->
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#monde-merveilleux -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#mots-des-narrateurs">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#monde-merveilleux">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°canon"/>
     </owl:Class>
     
 
@@ -1771,6 +2059,22 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#nightmarefest -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#nightmarefest">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#nme2017 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#nme2017">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#noir -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#noir">
@@ -1799,14 +2103,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#nouvelle">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°article"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#nouvelle-génération -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#nouvelle-génération">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
     </owl:Class>
     
 
@@ -1863,14 +2159,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#ordre-de-la-lumière">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#orgueil-et-supprimé -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#orgueil-et-supprimé">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
     </owl:Class>
     
 
@@ -2034,6 +2322,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#rave-fm">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#rei2015 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#rei2015">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -2202,6 +2498,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#sarkique">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#sc2015 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#sc2015">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
     </owl:Class>
     
 
@@ -2462,14 +2766,6 @@
     
 
 
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#série-introduction -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#série-introduction">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°série"/>
-    </owl:Class>
-    
-
-
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#sûr -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#sûr">
@@ -2614,6 +2910,14 @@
     
 
 
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#xks2018 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#xks2018">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#zh -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#zh">
@@ -2647,6 +2951,70 @@
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#!épilepsie -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#!épilepsie"/>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#1000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#1000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#2000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#2000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#3000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#3000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#4000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#4000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#5000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#5000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#6000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#6000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#7000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#7000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#8000 -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#8000">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°concours"/>
+    </owl:Class>
     
 
 
@@ -4172,6 +4540,14 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#°communautaire">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°méta"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#°concours -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#°concours">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°article"/>
     </owl:Class>
     
 

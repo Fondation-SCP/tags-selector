@@ -1,6 +1,7 @@
 import { printList, loadRdf } from "./database/tools.js";
 import { initGraph } from "./graph/init.js";
-import { registerGraphEvents } from "./graph/events.js";
+import { registerGraphEvents } from "./events.js";
+import { getSub } from "./database/get.js";
 
 // Données globales de l'application
 export const app =
@@ -14,7 +15,10 @@ export const app =
     engine: null,
 
     // Graphe
-    cy: null
+    cy: null,
+
+    // Tags sélectionnés
+    selectedTags: []
 }
 
 // Point de départ du programme
@@ -32,6 +36,8 @@ async function main()
     await initGraph();
     // Enregistrement des événements relatifs au graphe
     registerGraphEvents();
+
+    app.selectedTags = new Set();
 }
 
 main();

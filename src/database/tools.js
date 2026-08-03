@@ -5,8 +5,8 @@ export function printList(tags)
 {
     for (const element of tags)
     {
-        const   uri = element.get("element").value;
-        const   name = uri.split("#").pop();
+        const   url = element.get("element").value;
+        const   name = url.split("#").pop();
 
         console.log("> '" + name + "'");
     }

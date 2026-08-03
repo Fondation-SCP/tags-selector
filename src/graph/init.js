@@ -1,5 +1,7 @@
 import { app } from "../main.js";
 import { getSub, getRoots, getUniques } from "../database/get.js";
+import { addSubNodes, updateLayout } from "./tools.js";
+import { printList } from "../database/tools.js";
 
 function initGraphBase()
 {
@@ -11,8 +13,6 @@ function initGraphBase()
 
         // Désactive le déplacement des noeuds à la souris
         autoungrabify: true,
-        // Désative le déplacement de la caméra à la souris
-        userPanningEnabled: false,
 
         elements: [],
 
@@ -32,7 +32,8 @@ function initGraphBase()
                     "text-valign": "center",
                     "text-halign": "center",
 
-                    "font-size": 16,
+                    "font-size": 10,
+                    "text-max-width": "40px",
 
                     "background-color": "white",
                     color: "black",
@@ -40,8 +41,8 @@ function initGraphBase()
                     "border-width": 2,
                     "border-color": "#555",
 
-                    width: 75,
-                    height: 75,
+                    width: 40,
+                    height: 40,
 
                     "text-valign": "center",
                     "text-halign": "center",
@@ -84,32 +85,35 @@ async function initGraphNodes()
     // Fusion des tags précédents
     let     allStart = [...roots, ...isolated];
 
-    // Parcourt les tags et les instancie dans le graphe
+    // Parcourt la totalité des tags et les instancie dans le graph
     for (const element of allStart)
     {
-        const url = element.get("element").value;
-        const name = url.split("#").pop();
+        const   id = parseInt(app.cy.nodes().length) + 1;
+        const   url = element.get("element").value;
+        const   name = url.split("#").pop();
 
-        app.cy.add ({
-            data: { id: name, label: name },
+        const   node = app.cy.add ({
+            data:
+            {
+                id: id,
+                url: url,
+                label: name,
+            },
         });
+
+        // A retirer plus tard
+        if (name == "¬univers")
+            continue;
+
+        // Ajout des sous noeuds de ce noeud
+        await addSubNodes(node);
     }
 
     // Calcule la position des noeuds de façon cohérente et selon un layout
-    app.cy.layout
-    ({
-        name: "grid",
-        rows: 1,
-        padding: 0
-    }).run();
+    updateLayout();
 
-    // Place chaque noeud en haut du canvas
-    app.cy.nodes().forEach(node => {
-        node.position({
-            x: node.position("x"),
-            y: 75
-        });
-    });
+    // Centre la vision sur l'ensemble du graphe
+    app.cy.center(app.cy.nodes(":visible"));
 }
 
 export async function initGraph()
