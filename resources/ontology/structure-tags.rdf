@@ -1300,7 +1300,7 @@
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#essai -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#essai">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°article"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°méta"/>
     </owl:Class>
     
 
@@ -2242,14 +2242,6 @@
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#pompon-le-clown">
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#¬univers"/>
-    </owl:Class>
-    
-
-
-    <!-- http://www.semanticweb.org/ontologies/2025/6/tags#portail -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#portail">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°méta"/>
     </owl:Class>
     
 
