@@ -1348,7 +1348,7 @@
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#fanart -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#fanart">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°article"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°communautaire"/>
     </owl:Class>
     
 
@@ -1444,7 +1444,7 @@
     <!-- http://www.semanticweb.org/ontologies/2025/6/tags#galerie -->
 
     <owl:Class rdf:about="http://www.semanticweb.org/ontologies/2025/6/tags#galerie">
-        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#°communautaire"/>
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/ontologies/2025/6/tags#fanart"/>
     </owl:Class>
     
 
