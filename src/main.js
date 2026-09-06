@@ -41,18 +41,3 @@ async function main()
 }
 
 main();
-
-/*
-
-Code de test :
-
-    // Récupère puis affiche tous les sous tags du tag "informatique"
-    // printList(await getSub("http://www.semanticweb.org/ontologies/2025/6/tags#~informatique"));
-
-    // Récupère puis affiche les noeuds racine
-    // printList(await getRoots());
-
-    // Récupère les noeuds isolés (hérite de personne et personne n'en hérite)
-    // printList(await getUniques());
-
-*/
