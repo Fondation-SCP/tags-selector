@@ -1,6 +1,8 @@
 import { app } from "../main.js";
 import { initGraph } from "../graph/init.js";
 import { registerGraphEvents } from "../events.js";
+import { initBranchesGraph } from "../graph/branches/init.js";
+import { registerBranchesEvents } from "../graph/branches/events.js";
 import { updateTagsBox } from "../selection/tools.js";
 import { showLoading, hideLoading } from "../loading.js";
 
@@ -31,7 +33,12 @@ export const views =
         registerGraphEvents();
     },
 
-    async () => showPlaceholder(2),
+    async () =>
+    {
+        await initBranchesGraph();
+
+        registerBranchesEvents();
+    },
 
     async () => showPlaceholder(3)
 ];
@@ -80,6 +87,8 @@ export async function loadView(index)
 
     app.cy = null;
     app.view = index;
+
+    app.hierarchy = null;
 
     // Remise à zéro des tags sélectionnés
     app.selectedTags = new Set();

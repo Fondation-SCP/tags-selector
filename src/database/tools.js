@@ -1,12 +1,17 @@
 import { app } from "../main.js";
 
+export function getTagName(url)
+{
+    return url.split("#").pop();
+}
+
 // Affiche une liste de tags passée en paramètre
 export function printList(tags)
 {
     for (const element of tags)
     {
         const   url = element.get("element").value;
-        const   name = url.split("#").pop();
+        const   name = getTagName(url);
 
         console.log("> '" + name + "'");
     }

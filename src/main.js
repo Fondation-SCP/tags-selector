@@ -16,6 +16,8 @@ export const app =
     // Graphe
     cy: null,
 
+    hierarchy: null,
+
     // Affichage courant
     view: null,
 
