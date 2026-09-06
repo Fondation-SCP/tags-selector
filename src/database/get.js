@@ -67,16 +67,15 @@ export async function getUniques()
     return await stream.toArray();
 }
 
-// Renvoie les sous tags de premier ordre à partir d'un tag
-export async function getSub(tagUrl)
+// Renvoie tous les liens entre un tag et ses sous tags
+export async function getLinks()
 {
     const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-        SELECT ?element
+        SELECT DISTINCT ?parent ?child
         WHERE {
-            ?element rdfs:subClassOf <${tagUrl}> .
+            ?child rdfs:subClassOf ?parent .
         }
         `;
 

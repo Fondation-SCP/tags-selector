@@ -8,10 +8,14 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>
-            <img class="scp-logo" src="resources/scp-logo.svg" alt="">
-            tags-selector
-        </h1>
+        <div id="header">
+            <div id="title">
+                <img class="scp-logo" src="resources/scp-logo.svg" alt="">
+                <h1>tags-selector</h1>
+            </div>
+
+            <div id="views"></div>
+        </div>
 
         <div id="loading-overlay">
             <div id="loading-box">
@@ -23,7 +27,10 @@
         <!-- Graphe -->
         <div id="cy"></div>
 
-        <div id="selected-tags">
+        <!-- Affichages non implémentés -->
+        <div id="placeholder" class="hidden"></div>
+
+        <div id="selected-tags" class="hidden">
             <h3 id="selected-tags-title">Aucun tag sélectionné</h3>
             <div id="selected-tags-list"></div>
         </div>

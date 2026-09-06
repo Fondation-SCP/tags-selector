@@ -3,8 +3,12 @@ import { app } from "../main.js";
 // Met à jour les tags sélectionnés sur la page
 export function updateTagsBox()
 {
+    const   box = document.getElementById("selected-tags");
     const   title = document.getElementById("selected-tags-title");
     const   list = document.getElementById("selected-tags-list");
+
+    // L'encart n'est affiché que si au moins un tag est sélectionné
+    box.classList.toggle("hidden", app.selectedTags.size == 0);
 
     if (app.selectedTags.size == 0)
     {

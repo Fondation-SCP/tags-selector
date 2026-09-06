@@ -1,7 +1,6 @@
 import { app } from "../main.js";
-import { getSub, getRoots, getUniques } from "../database/get.js";
-import { addSubNodes, updateLayout } from "./tools.js";
-import { printList } from "../database/tools.js";
+import { getAll, getLinks } from "../database/get.js";
+import { updateLayout } from "./tools.js";
 
 function initGraphBase()
 {
@@ -27,13 +26,12 @@ function initGraphBase()
                     "overlay-opacity": 0,
 
                     "text-wrap": "wrap",
-                    "text-max-width": "65px",
+                    "text-max-width": "40px",
 
                     "text-valign": "center",
                     "text-halign": "center",
 
                     "font-size": 10,
-                    "text-max-width": "40px",
 
                     "background-color": "white",
                     color: "black",
@@ -43,9 +41,6 @@ function initGraphBase()
 
                     width: 40,
                     height: 40,
-
-                    "text-valign": "center",
-                    "text-halign": "center",
                 }
             },
             {
@@ -68,46 +63,63 @@ function initGraphBase()
                 selector: "core",
                 style: { "active-bg-opacity": 0 }
             }
-        ],
-
-        layout: { name: "grid" }
+        ]
     });
 }
 
 async function initGraphNodes()
 {
-    // Récupération des tags de racine
-    let     roots = await getRoots();
+    // Récupération de la totalité des tags
+    const   tags = await getAll();
 
-    // Récupération des tags uniques/isolés
-    let     isolated = await getUniques();
+    // Récupération de la totalité des liens entre un tag et ses sous tags
+    const   links = await getLinks();
 
-    // Fusion des tags précédents
-    let     allStart = [...roots, ...isolated];
-
-    // Parcourt la totalité des tags et les instancie dans le graph
-    for (const element of allStart)
+    // Tags et liens sont ajoutés en un seul bloc pour n'avoir qu'un recalcul du graphe
+    app.cy.batch(() =>
     {
-        const   id = parseInt(app.cy.nodes().length) + 1;
-        const   url = element.get("element").value;
-        const   name = url.split("#").pop();
+        // Instancie chaque tag dans le graphe
+        // L'url du tag sert d'identifiant pour qu'un tag n'existe qu'en un seul exemplaire
+        for (const element of tags)
+        {
+            const   url = element.get("element").value;
+            const   name = url.split("#").pop();
 
-        const   node = app.cy.add ({
-            data:
-            {
-                id: id,
-                url: url,
-                label: name,
-            },
-        });
+            app.cy.add ({
+                data:
+                {
+                    id: url,
+                    url: url,
+                    label: name,
+                },
+            });
+        }
 
-        // A retirer plus tard
-        if (name == "¬univers")
-            continue;
+        // Relie chaque tag à ses sous tags
+        for (const element of links)
+        {
+            const   parent = element.get("parent").value;
+            const   child = element.get("child").value;
 
-        // Ajout des sous noeuds de ce noeud
-        await addSubNodes(node);
-    }
+            // Un lien vers un tag non déclaré dans l'ontologie est ignoré
+            if (app.cy.getElementById(parent).length == 0 || app.cy.getElementById(child).length == 0)
+                continue;
+
+            app.cy.add ({
+                data:
+                {
+                    id: `${parent}-${child}`,
+                    source: parent,
+                    target: child
+                },
+            });
+        }
+
+        // Seuls les tags sans parent sont affichés au départ
+        // A rendre variable selon la configuration
+        app.cy.elements().hide();
+        app.cy.nodes().filter(node => node.incomers("edge").length == 0).show();
+    });
 
     // Calcule la position des noeuds de façon cohérente et selon un layout
     updateLayout();

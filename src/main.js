@@ -1,6 +1,6 @@
 import { loadRdf } from "./database/tools.js";
-import { initGraph } from "./graph/init.js";
-import { registerGraphEvents } from "./events.js";
+import { initViewsButtons, loadView } from "./views/tools.js";
+import { failLoading } from "./loading.js";
 
 // Données globales de l'application
 export const app =
@@ -16,19 +16,11 @@ export const app =
     // Graphe
     cy: null,
 
+    // Affichage courant
+    view: null,
+
     // Tags sélectionnés
     selectedTags: []
-}
-
-function hideLoading()
-{
-    document.getElementById("loading-overlay").classList.add("hidden");
-}
-
-function failLoading()
-{
-    document.getElementById("loading-spinner").remove();
-    document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
 }
 
 // Point de départ du programme
@@ -42,15 +34,15 @@ async function main()
     // Instanciation de Comunica pour faire des requêtes SPARQL au fichier .rdf
     app.engine = new Comunica.QueryEngine();
 
-    // Initialisation du graphe
-    await initGraph();
-    // Enregistrement des événements relatifs au graphe
-    registerGraphEvents();
+    // Création des boutons de changement d'affichage
+    initViewsButtons();
 
-    app.selectedTags = new Set();
+    // Chargement de l'affichage par défaut
+    await loadView(0);
 }
 
-main().then(hideLoading).catch((error) =>
+// Affichage d'un message d'erreur si le chargement échoue
+main().catch((error) =>
 {
     console.error(error);
     failLoading();
