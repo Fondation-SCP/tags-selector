@@ -1,7 +1,6 @@
-import { printList, loadRdf } from "./database/tools.js";
+import { loadRdf } from "./database/tools.js";
 import { initGraph } from "./graph/init.js";
 import { registerGraphEvents } from "./events.js";
-import { getSub } from "./database/get.js";
 
 // Données globales de l'application
 export const app =
@@ -19,6 +18,17 @@ export const app =
 
     // Tags sélectionnés
     selectedTags: []
+}
+
+function hideLoading()
+{
+    document.getElementById("loading-overlay").classList.add("hidden");
+}
+
+function failLoading()
+{
+    document.getElementById("loading-spinner").remove();
+    document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
 }
 
 // Point de départ du programme
@@ -40,4 +50,8 @@ async function main()
     app.selectedTags = new Set();
 }
 
-main();
+main().then(hideLoading).catch((error) =>
+{
+    console.error(error);
+    failLoading();
+});

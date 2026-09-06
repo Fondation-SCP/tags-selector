@@ -8,7 +8,17 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>SCP tags-selector</h1>
+        <h1>
+            <img class="scp-logo" src="resources/scp-logo.svg" alt="">
+            tags-selector
+        </h1>
+
+        <div id="loading-overlay">
+            <div id="loading-box">
+                <img id="loading-spinner" src="resources/scp-logo.svg" alt="">
+                <p id="loading-text">Chargement de l'ontologie...</p>
+            </div>
+        </div>
 
         <!-- Graphe -->
         <div id="cy"></div>
