@@ -155,9 +155,9 @@ export function isExpandable(url)
     return app.hierarchy.children.has(url);
 }
 
-export function addTagNode(id, url, owner, order, depth, position)
+export function buildTagNode(id, url, owner, order, depth, position)
 {
-    return app.cy.add({
+    return {
         data:
         {
             id: id,
@@ -171,19 +171,20 @@ export function addTagNode(id, url, owner, order, depth, position)
         position: position,
 
         classes: isExpandable(url) ? "tag expandable" : "tag"
-    });
+    };
 }
 
 function initBranchesNodes()
 {
-    app.cy.batch(() =>
-    {
-        for (const url of app.hierarchy.isolated)
-            addTagNode(url, url, null, 0, 0, { x: 0, y: 0 });
+    const   elements = [];
 
-        for (const url of app.hierarchy.roots)
-            addTagNode(url, url, null, 0, 0, { x: 0, y: 0 });
-    });
+    for (const url of app.hierarchy.isolated)
+        elements.push(buildTagNode(url, url, null, 0, 0, { x: 0, y: 0 }));
+
+    for (const url of app.hierarchy.roots)
+        elements.push(buildTagNode(url, url, null, 0, 0, { x: 0, y: 0 }));
+
+    app.cy.add(elements);
 
     initBranchesRadius();
     updateBranchesLayout();

@@ -22,6 +22,8 @@ const   CIRCLE_GAP = 90;
 const   ROOT_GAP = 100;
 const   PROFILE_BUCKET = 100;
 
+const   POSITION_EPSILON = 0.5;
+
 const   PAN_MARGIN = 120;
 const   ZOOM_MAX = 3;
 const   ZOOM_OUT_LIMIT = 0.5;
@@ -354,6 +356,17 @@ function commit(targets, animation)
     targets.forEach((position, id) =>
     {
         const   element = app.cy.getElementById(id);
+
+        if (element.length == 0)
+            return;
+
+        const   current = element.position();
+
+        if (!element.animated()
+            && Math.abs(current.x - position.x) < POSITION_EPSILON
+            && Math.abs(current.y - position.y) < POSITION_EPSILON)
+            return;
+
         const   delay = animation.delays.has(id) ? animation.delays.get(id) : 0;
 
         element.stop(true);

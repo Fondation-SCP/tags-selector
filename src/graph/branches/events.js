@@ -1,6 +1,6 @@
 import { app } from "../../main.js";
 import { updateTagsBox } from "../../selection/tools.js";
-import { addTagNode, getTrunkColor } from "./init.js";
+import { buildTagNode, getTrunkColor } from "./init.js";
 import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
 
 const   ANIMATION_DURATION = 300;
@@ -13,7 +13,7 @@ function updateSelection()
     updateTagsBox();
 }
 
-function createBranches(ownerId, items, depth, position, delays, counter, parentColor)
+function createBranches(elements, ownerId, items, depth, position, delays, counter, parentColor)
 {
     const   ids = [];
     const   color = getTrunkColor(ownerId, parentColor);
@@ -28,35 +28,41 @@ function createBranches(ownerId, items, depth, position, delays, counter, parent
         const   childId = item.group != null ? `${ownerId}|fork|${index}` : `${ownerId}|${item.url}`;
         const   delay = Math.round((counter.done / counter.total) * UNFURL_SPREAD);
 
-        app.cy.add({
+        elements.push({
             data: { id: jointId },
             position: { x: position.x, y: position.y },
             classes: "joint"
         });
 
-        app.cy.add({
+        elements.push({
             data: { id: `${previous}>${jointId}`, source: previous, target: jointId, width: trunkWidth, color: color },
             classes: "trunk"
         });
 
         if (item.group != null)
         {
-            const   fork = app.cy.add({
+            const   fork = {
                 data: { id: childId },
                 position: { x: position.x, y: position.y },
                 classes: "fork"
-            });
+            };
 
-            fork.data("childIds", createBranches(childId, item.group, depth + 1, position, delays, counter, color));
+            elements.push(fork);
+
+            fork.data.childIds = createBranches(elements, childId, item.group, depth + 1, position, delays, counter, color);
         }
         else
         {
-            addTagNode(childId, item.url, ownerId, index, depth + 1, { x: position.x, y: position.y }).data("ownerColor", color);
+            const   tag = buildTagNode(childId, item.url, ownerId, index, depth + 1, { x: position.x, y: position.y });
+
+            tag.data.ownerColor = color;
+
+            elements.push(tag);
 
             counter.done++;
         }
 
-        app.cy.add({
+        elements.push({
             data: { id: `${jointId}>${childId}`, source: jointId, target: childId, width: branchWidth },
             classes: "branch"
         });
@@ -79,15 +85,13 @@ function expand(node)
     if (urls == null || node.data("childIds") != null)
         return delays;
 
+    const   elements = [];
     const   position = node.position();
     const   counter = { done: 0, total: urls.length };
 
-    let     ids = [];
+    const   ids = createBranches(elements, node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, node.data("ownerColor"));
 
-    app.cy.batch(() =>
-    {
-        ids = createBranches(node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, node.data("ownerColor"));
-    });
+    app.cy.add(elements);
 
     node.data("childIds", ids);
 
@@ -127,18 +131,13 @@ function collapse(node)
 
 function retract(elements, position)
 {
-    elements.forEach(element =>
-    {
-        element.stop(true);
-        element.animate(
-            { position: { x: position.x, y: position.y } },
-            {
-                duration: ANIMATION_DURATION,
-                easing: "ease-in",
-                complete: () => element.remove()
-            }
-        );
-    });
+    elements.stop(true);
+    elements.animate(
+        { position: { x: position.x, y: position.y } },
+        { duration: ANIMATION_DURATION, easing: "ease-in" }
+    );
+
+    setTimeout(() => elements.remove(), ANIMATION_DURATION);
 }
 
 export function registerBranchesEvents()
@@ -186,6 +185,9 @@ export function registerBranchesEvents()
             leaving = collapse(node);
 
         updateSelection();
+
+        if (delays.size == 0 && leaving.length == 0)
+            return;
 
         const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
         const   target = targets.get(node.id());
