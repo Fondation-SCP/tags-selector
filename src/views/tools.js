@@ -27,20 +27,20 @@ export const views =
 [
     async () =>
     {
-        // Initialisation du graphe
-        await initGraph();
-        // Enregistrement des événements relatifs au graphe
-        registerGraphEvents();
-    },
-
-    async () =>
-    {
         await initBranchesGraph();
 
         registerBranchesEvents();
     },
 
-    async () => showPlaceholder(3)
+    async () => showPlaceholder(2),
+
+    async () =>
+    {
+        // Initialisation du graphe
+        await initGraph();
+        // Enregistrement des événements relatifs au graphe
+        registerGraphEvents();
+    }
 ];
 
 // Met en évidence le bouton de l'affichage courant
@@ -89,6 +89,7 @@ export async function loadView(index)
     app.view = index;
 
     app.hierarchy = null;
+    app.collapse = null;
 
     // Remise à zéro des tags sélectionnés
     app.selectedTags = new Set();

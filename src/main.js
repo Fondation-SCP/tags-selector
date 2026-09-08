@@ -1,5 +1,6 @@
 import { loadRdf } from "./database/tools.js";
 import { initViewsButtons, loadView } from "./views/tools.js";
+import { initTagsBox } from "./selection/tools.js";
 import { failLoading } from "./loading.js";
 
 // Données globales de l'application
@@ -17,6 +18,8 @@ export const app =
     cy: null,
 
     hierarchy: null,
+
+    collapse: null,
 
     // Affichage courant
     view: null,
@@ -38,6 +41,8 @@ async function main()
 
     // Création des boutons de changement d'affichage
     initViewsButtons();
+
+    initTagsBox();
 
     // Chargement de l'affichage par défaut
     await loadView(0);

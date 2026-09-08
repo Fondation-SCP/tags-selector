@@ -22,6 +22,24 @@ export function updateTagsBox()
     }
 }
 
+export function clearTags()
+{
+    if (app.cy != null)
+        app.cy.nodes(".selected").removeClass("selected");
+
+    app.selectedTags = new Set();
+
+    if (app.collapse != null)
+        app.collapse();
+
+    updateTagsBox();
+}
+
+export function initTagsBox()
+{
+    document.getElementById("selected-tags-reset").addEventListener("click", clearTags);
+}
+
 // Ajoute un tag à la variable globale et à la page
 export function addTag(tagName)
 {

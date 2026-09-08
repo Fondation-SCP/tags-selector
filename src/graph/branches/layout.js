@@ -17,9 +17,9 @@ const   EDGE_WIDTH = 5.5;
 const   EDGE_TAPER = 1.2;
 const   EDGE_MIN_WIDTH = 1.6;
 
-const   CENTER_STEP = 115;
+const   RING_STEP = 115;
+const   RING_MIN_RADIUS = 120;
 const   CIRCLE_GAP = 90;
-const   ROOT_GAP = 100;
 const   PROFILE_BUCKET = 100;
 
 const   POSITION_EPSILON = 0.5;
@@ -306,11 +306,11 @@ function getProfile(geometry)
     return profile;
 }
 
-function getRadius(geometries, centerRadius)
+function getRadius(geometries, ringRadius)
 {
     const   count = geometries.length;
 
-    let     radius = centerRadius + CIRCLE_GAP;
+    let     radius = ringRadius;
 
     if (count < 2)
         return radius;
@@ -380,8 +380,8 @@ export function initBranchesRadius()
     const   geometries = app.hierarchy.roots.map((url, index) =>
         measure(buildVirtual(url, new Set()), plainAccess, getMetrics(getDirection(index, count))));
 
-    app.hierarchy.centerRadius = getCircleRadius(app.hierarchy.isolated.length, CENTER_STEP);
-    app.hierarchy.radius = getRadius(geometries, app.hierarchy.centerRadius);
+    app.hierarchy.ringRadius = Math.max(RING_MIN_RADIUS, getCircleRadius(count, RING_STEP));
+    app.hierarchy.radius = getRadius(geometries, app.hierarchy.ringRadius);
 }
 
 function updateBounds(targets)
@@ -441,23 +441,14 @@ export function clampPan()
 export function updateBranchesLayout(animation)
 {
     const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
-    const   isolated = app.hierarchy.isolated.map(id => app.cy.getElementById(id));
 
     const   directions = roots.map((node, index) => getDirection(index, roots.length));
     const   geometries = roots.map((node, index) => measure(node, graphAccess, getMetrics(directions[index])));
 
-    const   centerRadius = app.hierarchy.centerRadius;
     const   radius = app.hierarchy.radius;
-    const   rootRadius = Math.min(radius, centerRadius + ROOT_GAP);
+    const   rootRadius = Math.min(radius, app.hierarchy.ringRadius);
 
     const   targets = new Map();
-
-    isolated.forEach((node, index) =>
-    {
-        const   angle = (2 * Math.PI * index) / isolated.length - Math.PI / 2;
-
-        targets.set(node.id(), { x: centerRadius * Math.cos(angle), y: centerRadius * Math.sin(angle) });
-    });
 
     roots.forEach((node, index) =>
     {

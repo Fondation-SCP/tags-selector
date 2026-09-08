@@ -13,10 +13,9 @@ function updateSelection()
     updateTagsBox();
 }
 
-function createBranches(elements, ownerId, items, depth, position, delays, counter, parentColor)
+function createBranches(elements, ownerId, items, depth, position, delays, counter, color)
 {
     const   ids = [];
-    const   color = getTrunkColor(ownerId, parentColor);
     const   trunkWidth = getEdgeWidth(depth);
     const   branchWidth = getEdgeWidth(depth + 1);
 
@@ -49,7 +48,7 @@ function createBranches(elements, ownerId, items, depth, position, delays, count
 
             elements.push(fork);
 
-            fork.data.childIds = createBranches(elements, childId, item.group, depth + 1, position, delays, counter, color);
+            fork.data.childIds = createBranches(elements, childId, item.group, depth + 1, position, delays, counter, getTrunkColor(childId, color));
         }
         else
         {
@@ -88,8 +87,9 @@ function expand(node)
     const   elements = [];
     const   position = node.position();
     const   counter = { done: 0, total: urls.length };
+    const   color = getTrunkColor(node.id(), node.data("ownerColor"));
 
-    const   ids = createBranches(elements, node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, node.data("ownerColor"));
+    const   ids = createBranches(elements, node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, color);
 
     app.cy.add(elements);
 
@@ -140,9 +140,68 @@ function retract(elements, position)
     setTimeout(() => elements.remove(), ANIMATION_DURATION);
 }
 
+function startChange(node)
+{
+    if (node.hasClass("leaving"))
+        return false;
+
+    app.cy.nodes(".leaving").remove();
+
+    return true;
+}
+
+function getAnchor(node)
+{
+    const   position = node.renderedPosition();
+
+    return { x: position.x, y: position.y };
+}
+
+function applyChange(node, delays, leaving, anchor)
+{
+    updateSelection();
+
+    if (delays.size == 0 && leaving.length == 0)
+        return;
+
+    const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+    const   target = targets.get(node.id());
+    const   zoom = app.cy.zoom();
+
+    app.cy.animate(
+        { pan: limitPan({ x: anchor.x - target.x * zoom, y: anchor.y - target.y * zoom }) },
+        { duration: ANIMATION_DURATION }
+    );
+
+    if (leaving.length > 0)
+        retract(leaving, target);
+}
+
+function collapseAll()
+{
+    app.cy.nodes(".leaving").remove();
+
+    const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
+    const   elements = roots.reduce((list, node) => detach(node, list), []);
+
+    app.cy.collection(elements).remove();
+
+    updateBranchesLayout();
+
+    app.cy.fit(app.cy.nodes(), 80);
+
+    if (app.cy.zoom() > 1)
+    {
+        app.cy.zoom(1);
+        app.cy.center(app.cy.nodes());
+    }
+}
+
 export function registerBranchesEvents()
 {
     let     clamping = false;
+
+    app.collapse = collapseAll;
 
     app.cy.on("viewport", () =>
     {
@@ -166,39 +225,31 @@ export function registerBranchesEvents()
     {
         const   node = event.target;
 
-        if (node.hasClass("leaving"))
+        if (!startChange(node))
             return;
 
-        app.cy.nodes(".leaving").remove();
-
-        const   anchor = node.renderedPosition();
-        const   before = { x: anchor.x, y: anchor.y };
+        const   anchor = getAnchor(node);
 
         node.toggleClass("selected");
 
-        let     delays = new Map();
-        let     leaving = app.cy.collection();
-
         if (node.hasClass("selected"))
-            delays = expand(node);
+            applyChange(node, expand(node), app.cy.collection(), anchor);
         else
-            leaving = collapse(node);
+            applyChange(node, new Map(), collapse(node), anchor);
+    });
 
-        updateSelection();
+    app.cy.on("cxttap", "node.tag", (event) =>
+    {
+        const   node = event.target;
 
-        if (delays.size == 0 && leaving.length == 0)
+        if (!startChange(node))
             return;
 
-        const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
-        const   target = targets.get(node.id());
-        const   zoom = app.cy.zoom();
+        const   anchor = getAnchor(node);
 
-        app.cy.animate(
-            { pan: limitPan({ x: before.x - target.x * zoom, y: before.y - target.y * zoom }) },
-            { duration: ANIMATION_DURATION }
-        );
-
-        if (leaving.length > 0)
-            retract(leaving, target);
+        if (node.data("childIds") == null)
+            applyChange(node, expand(node), app.cy.collection(), anchor);
+        else
+            applyChange(node, new Map(), collapse(node), anchor);
     });
 }
