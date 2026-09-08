@@ -4,13 +4,59 @@ import { getTagName } from "../../database/tools.js";
 import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
 
+const   TRUNK_COLORS =
+[
+    "#7a6a5f",
+    "#6b7f6e",
+    "#5f7080",
+    "#8a6f7d",
+    "#8a7a55",
+    "#5c7a75",
+    "#7d6480",
+    "#96705f",
+    "#69708a",
+    "#7f8560"
+];
+
+function hashId(id)
+{
+    let     hash = 0;
+
+    for (let index = 0; index < id.length; index++)
+        hash = (hash * 31 + id.charCodeAt(index)) % 100000007;
+
+    return hash;
+}
+
+export function getTrunkColor(ownerId, parentColor)
+{
+    const   start = hashId(ownerId) % TRUNK_COLORS.length;
+
+    for (let step = 0; step < TRUNK_COLORS.length; step++)
+    {
+        const   color = TRUNK_COLORS[(start + step) % TRUNK_COLORS.length];
+
+        if (color != parentColor)
+            return color;
+    }
+
+    return TRUNK_COLORS[start];
+}
+
 const   branchesStyle =
 [
     {
         selector: "node.tag",
         style:
         {
-            "text-max-width": "80px"
+            shape: "round-rectangle",
+
+            width: "label",
+            height: "label",
+            padding: 6,
+
+            "text-max-width": "80px",
+            "text-overflow-wrap": "anywhere"
         }
     },
     {
@@ -37,11 +83,19 @@ const   branchesStyle =
         }
     },
     {
-        selector: "edge.trunk, edge.branch",
+        selector: "edge.trunk",
         style:
         {
             width: "data(width)",
-            "line-color": "#444"
+            "line-color": "data(color)"
+        }
+    },
+    {
+        selector: "edge.branch",
+        style:
+        {
+            width: "data(width)",
+            "line-color": "#6f6f6f"
         }
     }
 ];

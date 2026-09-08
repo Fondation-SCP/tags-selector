@@ -1,7 +1,7 @@
 import { app } from "../../main.js";
 import { updateTagsBox } from "../../selection/tools.js";
-import { addTagNode } from "./init.js";
-import { buildBranches, getChildNodes, getEdgeWidth, getJointId, updateBranchesLayout } from "./layout.js";
+import { addTagNode, getTrunkColor } from "./init.js";
+import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
 
 const   ANIMATION_DURATION = 300;
 const   UNFURL_SPREAD = 250;
@@ -13,9 +13,10 @@ function updateSelection()
     updateTagsBox();
 }
 
-function createBranches(ownerId, items, depth, position, delays, counter)
+function createBranches(ownerId, items, depth, position, delays, counter, parentColor)
 {
     const   ids = [];
+    const   color = getTrunkColor(ownerId, parentColor);
     const   trunkWidth = getEdgeWidth(depth);
     const   branchWidth = getEdgeWidth(depth + 1);
 
@@ -34,7 +35,7 @@ function createBranches(ownerId, items, depth, position, delays, counter)
         });
 
         app.cy.add({
-            data: { id: `${previous}>${jointId}`, source: previous, target: jointId, width: trunkWidth },
+            data: { id: `${previous}>${jointId}`, source: previous, target: jointId, width: trunkWidth, color: color },
             classes: "trunk"
         });
 
@@ -46,11 +47,11 @@ function createBranches(ownerId, items, depth, position, delays, counter)
                 classes: "fork"
             });
 
-            fork.data("childIds", createBranches(childId, item.group, depth + 1, position, delays, counter));
+            fork.data("childIds", createBranches(childId, item.group, depth + 1, position, delays, counter, color));
         }
         else
         {
-            addTagNode(childId, item.url, ownerId, index, depth + 1, { x: position.x, y: position.y });
+            addTagNode(childId, item.url, ownerId, index, depth + 1, { x: position.x, y: position.y }).data("ownerColor", color);
 
             counter.done++;
         }
@@ -85,7 +86,7 @@ function expand(node)
 
     app.cy.batch(() =>
     {
-        ids = createBranches(node.id(), buildBranches(urls), node.data("depth"), position, delays, counter);
+        ids = createBranches(node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, node.data("ownerColor"));
     });
 
     node.data("childIds", ids);
@@ -142,6 +143,18 @@ function retract(elements, position)
 
 export function registerBranchesEvents()
 {
+    let     clamping = false;
+
+    app.cy.on("viewport", () =>
+    {
+        if (clamping)
+            return;
+
+        clamping = true;
+        clampPan();
+        clamping = false;
+    });
+
     app.cy.on("mouseover", "node.tag", () => {
         app.cy.container().style.cursor = "pointer";
     });
@@ -179,7 +192,7 @@ export function registerBranchesEvents()
         const   zoom = app.cy.zoom();
 
         app.cy.animate(
-            { pan: { x: before.x - target.x * zoom, y: before.y - target.y * zoom } },
+            { pan: limitPan({ x: before.x - target.x * zoom, y: before.y - target.y * zoom }) },
             { duration: ANIMATION_DURATION }
         );
 

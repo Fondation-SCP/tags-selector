@@ -1,26 +1,30 @@
 import { app } from "../../main.js";
 
 const   NODE_SIZE = 40;
-const   LEAF_HALF_WIDTH = 45;
+
+const   CHIP_HALF_WIDTH = 50;
+const   CHIP_HALF_HEIGHT = 26;
+const   CHIP_GAP = 12;
 
 const   TRUNK_START = 60;
+const   TRUNK_CLEARANCE = 30;
 
-const   BRANCH_LENGTH = 80;
 const   BRANCH_SLOPE = 0.75;
-const   BRANCH_STEP = 62;
-const   BRANCH_STAGGER = 31;
 const   BRANCH_CLEARANCE = 35;
+const   BRANCH_LANES = 2;
 
-const   EDGE_WIDTH = 7;
-const   EDGE_TAPER = 1.5;
-const   EDGE_MIN_WIDTH = 2;
+const   EDGE_WIDTH = 5.5;
+const   EDGE_TAPER = 1.2;
+const   EDGE_MIN_WIDTH = 1.6;
 
-const   SUBTREE_GAP = 35;
-
-const   CENTER_STEP = 95;
+const   CENTER_STEP = 115;
 const   CIRCLE_GAP = 90;
 const   ROOT_GAP = 100;
 const   PROFILE_BUCKET = 100;
+
+const   PAN_MARGIN = 120;
+const   ZOOM_MAX = 3;
+const   ZOOM_OUT_LIMIT = 0.5;
 
 const   FORK_MIN = 20;
 const   FORK_SIZE = 30;
@@ -127,52 +131,117 @@ function toVirtual(item, path)
     return buildVirtual(item.url, path);
 }
 
-function measure(node, access)
+export function getDirection(index, count)
+{
+    const   angle = (2 * Math.PI * index) / count - Math.PI / 2;
+
+    return { x: Math.cos(angle), y: Math.sin(angle) };
+}
+
+function getMetrics(direction)
+{
+    const   along = CHIP_HALF_WIDTH * Math.abs(direction.x) + CHIP_HALF_HEIGHT * Math.abs(direction.y);
+    const   across = CHIP_HALF_WIDTH * Math.abs(direction.y) + CHIP_HALF_HEIGHT * Math.abs(direction.x);
+    const   step = 2 * along + CHIP_GAP;
+
+    return {
+        along: along,
+        across: across,
+        step: step,
+        lane: 2 * across + CHIP_GAP,
+        length: across + TRUNK_CLEARANCE,
+        stagger: step / (2 * BRANCH_LANES)
+    };
+}
+
+function buildLanes(trunkStart, metrics)
+{
+    const   lanes = [];
+
+    for (let index = 0; index < BRANCH_LANES; index++)
+        for (const side of [-1, 1])
+            lanes.push({ side: side, offset: metrics.length + index * metrics.lane, axis: trunkStart });
+
+    return lanes;
+}
+
+function getSideAxis(lanes, side)
+{
+    return Math.max(...lanes.filter(lane => lane.side == side).map(lane => lane.axis));
+}
+
+function measure(node, access, metrics)
 {
     const   children = access.children(node);
     const   fork = access.fork(node);
-    const   halfWidth = fork ? 0 : LEAF_HALF_WIDTH;
+    const   halfWidth = fork ? 0 : metrics.across;
     const   trunkStart = fork ? FORK_TRUNK_START : TRUNK_START;
     const   geometry = { height: 0, halfWidth: halfWidth, left: halfWidth, right: halfWidth, branches: [] };
 
     if (children.length == 0)
         return geometry;
 
-    let     leftAxis = trunkStart;
-    let     rightAxis = trunkStart;
+    const   lanes = buildLanes(trunkStart, metrics);
+    const   blocked = [trunkStart, trunkStart];
+
     let     axis = trunkStart;
 
     children.forEach((child) =>
     {
-        const   side = leftAxis <= rightAxis ? -1 : 1;
-        const   start = Math.max(side < 0 ? leftAxis : rightAxis, axis);
+        const   sub = measure(child, access, metrics);
+        const   leaf = sub.branches.length == 0;
 
-        const   sub = measure(child, access);
+        let     side = 0;
+        let     offset = 0;
+        let     start = 0;
 
-        const   inner = side < 0 ? sub.right : sub.left;
-        const   outer = side < 0 ? sub.left : sub.right;
-        const   offset = Math.max(BRANCH_LENGTH, inner + BRANCH_CLEARANCE);
+        if (leaf)
+        {
+            const   lane = lanes.reduce((best, entry) => entry.axis < best.axis ? entry : best);
+
+            side = lane.side;
+            offset = lane.offset;
+            start = Math.max(lane.axis, axis);
+
+            lane.axis = start + metrics.step;
+        }
+        else
+        {
+            const   left = getSideAxis(lanes, -1);
+            const   right = getSideAxis(lanes, 1);
+
+            side = left <= right ? -1 : 1;
+            offset = Math.max(metrics.length, (side < 0 ? sub.right : sub.left) + BRANCH_CLEARANCE);
+            start = Math.max(axis, side < 0 ? left : right, blocked[side < 0 ? 0 : 1] + metrics.step - offset * BRANCH_SLOPE);
+        }
+
+        const   slot = side < 0 ? 0 : 1;
         const   rise = offset * BRANCH_SLOPE;
+        const   outer = side < 0 ? sub.left : sub.right;
 
-        const   clearance = BRANCH_SLOPE * Math.max(offset - BRANCH_LENGTH, inner) + sub.height + SUBTREE_GAP;
-        const   next = start + Math.max(BRANCH_STEP, clearance);
+        if (leaf)
+            blocked[slot] = Math.max(blocked[slot], start + rise + metrics.along);
+        else
+        {
+            const   inner = side < 0 ? sub.right : sub.left;
+            const   clearance = BRANCH_SLOPE * Math.max(offset - metrics.length, inner) + sub.height + metrics.along + metrics.step;
+            const   next = start + Math.max(metrics.step, clearance);
+
+            lanes.forEach(lane => { if (lane.side == side) lane.axis = next; });
+
+            blocked[slot] = start + rise + sub.height + metrics.along;
+        }
 
         geometry.branches.push({ node: child, geometry: sub, joint: start, x: side * offset, y: start + rise });
 
         if (side < 0)
-        {
-            leftAxis = next;
             geometry.left = Math.max(geometry.left, offset + outer);
-        }
         else
-        {
-            rightAxis = next;
             geometry.right = Math.max(geometry.right, offset + outer);
-        }
 
         geometry.height = Math.max(geometry.height, start + rise + sub.height);
 
-        axis = start + BRANCH_STAGGER;
+        axis = start + metrics.stagger;
     });
 
     return geometry;
@@ -294,10 +363,66 @@ function commit(targets, animation)
 
 export function initBranchesRadius()
 {
-    const   geometries = app.hierarchy.roots.map(url => measure(buildVirtual(url, new Set()), plainAccess));
+    const   count = app.hierarchy.roots.length;
+    const   geometries = app.hierarchy.roots.map((url, index) =>
+        measure(buildVirtual(url, new Set()), plainAccess, getMetrics(getDirection(index, count))));
 
     app.hierarchy.centerRadius = getCircleRadius(app.hierarchy.isolated.length, CENTER_STEP);
     app.hierarchy.radius = getRadius(geometries, app.hierarchy.centerRadius);
+}
+
+function updateBounds(targets)
+{
+    let     x1 = Infinity;
+    let     y1 = Infinity;
+    let     x2 = -Infinity;
+    let     y2 = -Infinity;
+
+    targets.forEach((position) =>
+    {
+        x1 = Math.min(x1, position.x);
+        y1 = Math.min(y1, position.y);
+        x2 = Math.max(x2, position.x);
+        y2 = Math.max(y2, position.y);
+    });
+
+    app.hierarchy.bounds =
+    {
+        x1: x1 - CHIP_HALF_WIDTH,
+        y1: y1 - CHIP_HALF_HEIGHT,
+        x2: x2 + CHIP_HALF_WIDTH,
+        y2: y2 + CHIP_HALF_HEIGHT
+    };
+
+    const   bounds = app.hierarchy.bounds;
+    const   fit = Math.min(app.cy.width() / (bounds.x2 - bounds.x1), app.cy.height() / (bounds.y2 - bounds.y1));
+
+    app.cy.maxZoom(ZOOM_MAX);
+    app.cy.minZoom(Math.min(fit / 2, ZOOM_OUT_LIMIT));
+}
+
+export function limitPan(pan)
+{
+    const   bounds = app.hierarchy == null ? null : app.hierarchy.bounds;
+
+    if (bounds == null)
+        return pan;
+
+    const   zoom = app.cy.zoom();
+
+    return {
+        x: Math.min(Math.max(pan.x, PAN_MARGIN - bounds.x2 * zoom), app.cy.width() - PAN_MARGIN - bounds.x1 * zoom),
+        y: Math.min(Math.max(pan.y, PAN_MARGIN - bounds.y2 * zoom), app.cy.height() - PAN_MARGIN - bounds.y1 * zoom)
+    };
+}
+
+export function clampPan()
+{
+    const   pan = app.cy.pan();
+    const   limited = limitPan(pan);
+
+    if (limited.x != pan.x || limited.y != pan.y)
+        app.cy.pan(limited);
 }
 
 export function updateBranchesLayout(animation)
@@ -305,7 +430,8 @@ export function updateBranchesLayout(animation)
     const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
     const   isolated = app.hierarchy.isolated.map(id => app.cy.getElementById(id));
 
-    const   geometries = roots.map(node => measure(node, graphAccess));
+    const   directions = roots.map((node, index) => getDirection(index, roots.length));
+    const   geometries = roots.map((node, index) => measure(node, graphAccess, getMetrics(directions[index])));
 
     const   centerRadius = app.hierarchy.centerRadius;
     const   radius = app.hierarchy.radius;
@@ -322,8 +448,7 @@ export function updateBranchesLayout(animation)
 
     roots.forEach((node, index) =>
     {
-        const   angle = (2 * Math.PI * index) / roots.length - Math.PI / 2;
-        const   direction = { x: Math.cos(angle), y: Math.sin(angle) };
+        const   direction = directions[index];
         const   origin = { x: radius * direction.x, y: radius * direction.y };
 
         targets.set(node.id(), { x: rootRadius * direction.x, y: rootRadius * direction.y });
@@ -331,6 +456,7 @@ export function updateBranchesLayout(animation)
         apply(node, geometries[index], origin, direction, targets);
     });
 
+    updateBounds(targets);
     commit(targets, animation);
 
     return targets;
