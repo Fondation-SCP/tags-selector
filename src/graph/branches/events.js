@@ -6,6 +6,12 @@ import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limit
 const   ANIMATION_DURATION = 300;
 const   UNFURL_SPREAD = 250;
 
+let     zoneOrder = 0;
+
+const   ZOOM_STEP = 1.15;
+const   WHEEL_LINE = 40;
+const   WHEEL_LIMIT = 120;
+
 function updateSelection()
 {
     app.selectedTags = new Set(app.cy.nodes(".tag.selected").map(node => node.data("label")));
@@ -13,7 +19,7 @@ function updateSelection()
     updateTagsBox();
 }
 
-function createBranches(elements, ownerId, items, depth, position, delays, counter, color)
+function createBranches(elements, ownerId, items, depth, position, delays, counter, color, avoided)
 {
     const   ids = [];
     const   trunkWidth = getEdgeWidth(depth);
@@ -48,7 +54,7 @@ function createBranches(elements, ownerId, items, depth, position, delays, count
 
             elements.push(fork);
 
-            fork.data.childIds = createBranches(elements, childId, item.group, depth + 1, position, delays, counter, getTrunkColor(childId, color));
+            fork.data.childIds = createBranches(elements, childId, item.group, depth + 1, position, delays, counter, getTrunkColor(childId, [...avoided, color]), avoided);
         }
         else
         {
@@ -76,6 +82,28 @@ function createBranches(elements, ownerId, items, depth, position, delays, count
     return ids;
 }
 
+function getUsedColors(node)
+{
+    const   branch = node.id().split("|")[0];
+    const   colors = [];
+
+    app.cy.nodes(".tag").forEach((other) =>
+    {
+        const   color = other.data("zoneColor");
+
+        if (color == null || other.id() == node.id())
+            return;
+
+        if (other.data("childIds") == null || other.hasClass("leaving"))
+            return;
+
+        if (other.data("depth") == 0 || other.id().split("|")[0] == branch)
+            colors.push(color);
+    });
+
+    return colors;
+}
+
 function expand(node)
 {
     const   urls = app.hierarchy.children.get(node.data("url"));
@@ -87,9 +115,16 @@ function expand(node)
     const   elements = [];
     const   position = node.position();
     const   counter = { done: 0, total: urls.length };
-    const   color = getTrunkColor(node.id(), node.data("ownerColor"));
+    const   avoided = getUsedColors(node);
 
-    const   ids = createBranches(elements, node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, color);
+    avoided.push(node.data("ownerColor"));
+
+    const   color = getTrunkColor(node.id(), avoided);
+
+    node.data("zoneColor", color);
+    node.data("zoneOrder", ++zoneOrder);
+
+    const   ids = createBranches(elements, node.id(), buildBranches(urls), node.data("depth"), position, delays, counter, color, avoided);
 
     app.cy.add(elements);
 
@@ -197,8 +232,48 @@ function collapseAll()
     }
 }
 
+function getWheelSteps(event)
+{
+    let     delta = event.deltaY;
+
+    if (event.deltaMode == 1)
+        delta *= WHEEL_LINE;
+    else if (event.deltaMode == 2)
+        delta *= app.cy.height();
+
+    return Math.max(-WHEEL_LIMIT, Math.min(WHEEL_LIMIT, delta)) / 100;
+}
+
+function registerWheelZoom()
+{
+    const   container = app.cy.container();
+
+    const   onWheel = (event) =>
+    {
+        event.preventDefault();
+
+        const   steps = getWheelSteps(event);
+
+        if (steps == 0)
+            return;
+
+        const   box = container.getBoundingClientRect();
+
+        app.cy.zoom({
+            level: app.cy.zoom() * Math.pow(ZOOM_STEP, -steps),
+            renderedPosition: { x: event.clientX - box.left, y: event.clientY - box.top }
+        });
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+
+    app.cy.on("destroy", () => container.removeEventListener("wheel", onWheel));
+}
+
 export function registerBranchesEvents()
 {
+    registerWheelZoom();
+
     let     clamping = false;
 
     app.collapse = collapseAll;
