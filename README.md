@@ -13,6 +13,5 @@
 – `src/main.js` : définition de la variable globale `app`, création de la base de données et du moteur `Comunica` (pour interagir avec), des boutons d'affichage et de la boite des tags sélectionnés  
 
 – `resources/ontology/structure-tags.rdf` : ontologie des tags (servie via `Github Pages`)  
-– `resources/ontology/structure-tags.properties` : paramètres de connexion générés à l'export de l'ontologie (inutilisés ici)  
 – `resources/scp-logo.svg` : logo affiché dans l'en-tête et sur l'écran de chargement  
 – `resources/besace-malicieuse.txt` : mises à jour qui devront être effectuées pendant l'implémentation finale du nouveau système d'étiquettes (encore en vrac, sera mis au propre plus tard)  
