@@ -1,20 +1,45 @@
 import { app } from "../../main.js";
 import { updateTagsBox } from "../../selection/tools.js";
-import { buildTagNode, getTrunkColor } from "./init.js";
+import { getTagName } from "../../database/tools.js";
+import { buildTagNode, getTagPath, getTrunkColor, MISC_TAG } from "./init.js";
 import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
 
 const   ANIMATION_DURATION = 300;
 const   UNFURL_SPREAD = 250;
 
+const   HIGHLIGHT_BLINKS = 3;
+const   HIGHLIGHT_STEP = 250;
+
 let     zoneOrder = 0;
+let     highlightTimers = [];
 
 const   ZOOM_STEP = 1.15;
 const   WHEEL_LINE = 40;
 const   WHEEL_LIMIT = 120;
 
+function addAncestors(url, ancestors)
+{
+    for (const parent of app.hierarchy.parents.get(url) ?? [])
+    {
+        if (ancestors.has(parent))
+            continue;
+
+        ancestors.add(parent);
+        addAncestors(parent, ancestors);
+    }
+}
+
 function updateSelection()
 {
-    app.selectedTags = new Set(app.cy.nodes(".tag.selected").map(node => node.data("label")));
+    const   selected = app.cy.nodes(".tag.selected");
+    const   urls = new Set(selected.map(node => node.data("url")));
+    const   required = new Set();
+
+    urls.forEach(url => addAncestors(url, required));
+
+    app.cy.nodes(".tag").forEach(node => node.toggleClass("implied", required.has(node.data("url")) && !node.hasClass("selected")));
+
+    app.selectedTags = new Set([...required, ...urls].map(getTagName));
 
     updateTagsBox();
 }
@@ -68,7 +93,7 @@ function createBranches(elements, ownerId, items, depth, position, delays, count
         }
 
         elements.push({
-            data: { id: `${jointId}>${childId}`, source: jointId, target: childId, width: branchWidth },
+            data: { id: `${jointId}>${childId}`, source: jointId, target: childId, width: branchWidth, color: color },
             classes: "branch"
         });
 
@@ -212,15 +237,8 @@ function applyChange(node, delays, leaving, anchor)
         retract(leaving, target);
 }
 
-function collapseAll()
+function fitGraph()
 {
-    app.cy.nodes(".leaving").remove();
-
-    const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
-    const   elements = roots.reduce((list, node) => detach(node, list), []);
-
-    app.cy.collection(elements).remove();
-
     updateBranchesLayout();
 
     app.cy.fit(app.cy.nodes(), 80);
@@ -229,6 +247,118 @@ function collapseAll()
     {
         app.cy.zoom(1);
         app.cy.center(app.cy.nodes());
+    }
+}
+
+function collapseAll()
+{
+    app.cy.elements().stop(true);
+    app.cy.nodes(".leaving").remove();
+
+    const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
+    const   elements = roots.reduce((list, node) => detach(node, list), []);
+
+    app.cy.collection(elements).remove();
+
+    updateSelection();
+    fitGraph();
+}
+
+function expandAll()
+{
+    app.cy.elements().stop(true);
+    app.cy.nodes(".leaving").remove();
+
+    const   isPending = node => node.data("childIds") == null && !node.id().split("|").slice(0, -1).includes(node.data("url"));
+
+    let     pending = app.cy.nodes(".tag.expandable").filter(isPending);
+
+    while (pending.length > 0)
+    {
+        pending.forEach(node => expand(node));
+
+        pending = app.cy.nodes(".tag.expandable").filter(isPending);
+    }
+
+    updateSelection();
+    fitGraph();
+}
+
+function findChild(node, url)
+{
+    for (const child of getChildNodes(node))
+    {
+        if (child.hasClass("fork"))
+        {
+            const   found = findChild(child, url);
+
+            if (found != null)
+                return found;
+        }
+        else if (child.data("url") == url)
+            return child;
+    }
+
+    return null;
+}
+
+function revealTag(url)
+{
+    const   path = getTagPath(url);
+
+    if (path == null)
+        return;
+
+    app.cy.nodes(".leaving").remove();
+
+    const   delays = new Map();
+
+    let     node = app.cy.getElementById(path[0]);
+
+    for (const step of path.slice(1))
+    {
+        expand(node).forEach((delay, id) => delays.set(id, delay));
+
+        node = findChild(node, step);
+
+        if (node == null)
+            return;
+    }
+
+    updateSelection();
+
+    const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+    const   target = targets.get(node.id());
+    const   zoom = Math.max(app.cy.zoom(), 1);
+
+    app.cy.stop(true);
+    app.cy.animate(
+        {
+            zoom: zoom,
+            pan: { x: app.cy.width() / 2 - target.x * zoom, y: app.cy.height() / 2 - target.y * zoom }
+        },
+        { duration: ANIMATION_DURATION }
+    );
+
+    highlight(node);
+}
+
+function highlight(node)
+{
+    highlightTimers.forEach(timer => clearTimeout(timer));
+    app.cy.nodes(".highlighted").removeClass("highlighted");
+
+    highlightTimers = [];
+
+    for (let index = 0; index < HIGHLIGHT_BLINKS * 2; index++)
+    {
+        const   timer = setTimeout(() =>
+        {
+            if (node.cy() == app.cy && !node.removed())
+                node.toggleClass("highlighted", index % 2 == 0);
+        }, ANIMATION_DURATION + index * HIGHLIGHT_STEP);
+
+        highlightTimers.push(timer);
     }
 }
 
@@ -277,6 +407,8 @@ export function registerBranchesEvents()
     let     clamping = false;
 
     app.collapse = collapseAll;
+    app.expand = expandAll;
+    app.reveal = revealTag;
 
     app.cy.on("viewport", () =>
     {
@@ -300,6 +432,12 @@ export function registerBranchesEvents()
     {
         const   node = event.target;
 
+        if (node.data("url") == MISC_TAG)
+        {
+            toggleBranch(node);
+            return;
+        }
+
         if (!startChange(node))
             return;
 
@@ -313,18 +451,18 @@ export function registerBranchesEvents()
             applyChange(node, new Map(), collapse(node), anchor);
     });
 
-    app.cy.on("cxttap", "node.tag", (event) =>
-    {
-        const   node = event.target;
+    app.cy.on("cxttap", "node.tag", (event) => toggleBranch(event.target));
+}
 
-        if (!startChange(node))
-            return;
+function toggleBranch(node)
+{
+    if (!startChange(node))
+        return;
 
-        const   anchor = getAnchor(node);
+    const   anchor = getAnchor(node);
 
-        if (node.data("childIds") == null)
-            applyChange(node, expand(node), app.cy.collection(), anchor);
-        else
-            applyChange(node, new Map(), collapse(node), anchor);
-    });
+    if (node.data("childIds") == null)
+        applyChange(node, expand(node), app.cy.collection(), anchor);
+    else
+        applyChange(node, new Map(), collapse(node), anchor);
 }

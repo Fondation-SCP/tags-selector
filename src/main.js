@@ -1,6 +1,7 @@
 import { loadRdf } from "./database/tools.js";
-import { initViewsButtons, loadView } from "./views/tools.js";
+import { initViewsKeys, initGraphButtons, loadView } from "./views/tools.js";
 import { initTagsBox } from "./selection/tools.js";
+import { initSearch } from "./search/tools.js";
 import { failLoading } from "./loading.js";
 
 // Données globales de l'application
@@ -20,6 +21,8 @@ export const app =
     hierarchy: null,
 
     collapse: null,
+    expand: null,
+    reveal: null,
 
     // Affichage courant
     view: null,
@@ -39,10 +42,13 @@ async function main()
     // Instanciation de Comunica pour faire des requêtes SPARQL au fichier .rdf
     app.engine = new Comunica.QueryEngine();
 
-    // Création des boutons de changement d'affichage
-    initViewsButtons();
+    initViewsKeys();
 
     initTagsBox();
+
+    initGraphButtons();
+
+    initSearch();
 
     // Chargement de l'affichage par défaut
     await loadView(0);

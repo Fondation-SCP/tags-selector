@@ -5,7 +5,7 @@ import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
 import { initZonesLayer } from "./zones.js";
 
-const   MISC_TAG = "divers";
+export const   MISC_TAG = "divers";
 
 const   LABEL_FONT = "10px \"Helvetica Neue\", Helvetica, sans-serif";
 const   LABEL_MAX_WIDTH = 80;
@@ -183,6 +183,23 @@ const   branchesStyle =
         }
     },
     {
+        selector: "node.implied",
+        style:
+        {
+            "background-color": "#9fd49f"
+        }
+    },
+    {
+        selector: "node.highlighted",
+        style:
+        {
+            "underlay-color": "#ffc400",
+            "underlay-opacity": 0.8,
+            "underlay-padding": 8,
+            "underlay-shape": "round-rectangle"
+        }
+    },
+    {
         selector: "node.joint, node.fork",
         style:
         {
@@ -210,7 +227,7 @@ const   branchesStyle =
         style:
         {
             width: "data(width)",
-            "line-color": "#6f6f6f"
+            "line-color": "data(color)"
         }
     }
 ];
@@ -241,6 +258,7 @@ async function initBranchesData()
 
     const   known = new Set(tags.map(element => element.get("element").value));
     const   children = new Map();
+    const   parents = new Map();
 
     for (const element of links)
     {
@@ -254,6 +272,11 @@ async function initBranchesData()
             children.set(parent, []);
 
         children.get(parent).push(child);
+
+        if (!parents.has(child))
+            parents.set(child, []);
+
+        parents.get(child).push(parent);
     }
 
     for (const list of children.values())
@@ -273,8 +296,41 @@ async function initBranchesData()
     app.hierarchy =
     {
         children: children,
-        roots: list.sort(sortByName)
+        parents: parents,
+        roots: list.sort(sortByName),
+        tags: [...known]
     };
+}
+
+export function getTagPath(url)
+{
+    const   parents = new Map();
+    const   queue = [...app.hierarchy.roots];
+
+    for (const root of queue)
+        parents.set(root, null);
+
+    for (let index = 0; index < queue.length && queue[index] != url; index++)
+    {
+        for (const child of app.hierarchy.children.get(queue[index]) ?? [])
+        {
+            if (parents.has(child))
+                continue;
+
+            parents.set(child, queue[index]);
+            queue.push(child);
+        }
+    }
+
+    if (!parents.has(url))
+        return null;
+
+    const   path = [];
+
+    for (let current = url; current != null; current = parents.get(current))
+        path.unshift(current);
+
+    return path;
 }
 
 export function isExpandable(url)

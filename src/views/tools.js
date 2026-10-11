@@ -4,6 +4,7 @@ import { registerGraphEvents } from "../events.js";
 import { initBranchesGraph } from "../graph/branches/init.js";
 import { registerBranchesEvents } from "../graph/branches/events.js";
 import { updateTagsBox } from "../selection/tools.js";
+import { showSearch, hideSearch } from "../search/tools.js";
 import { showLoading, hideLoading } from "../loading.js";
 
 // Affiche un message à la place d'un affichage non implémenté
@@ -43,31 +44,49 @@ export const views =
     }
 ];
 
-// Met en évidence le bouton de l'affichage courant
-function updateViewsButtons()
-{
-    const   buttons = document.querySelectorAll("#views .view-button");
+let     loading = false;
 
-    buttons.forEach((button, index) => button.classList.toggle("active", index == app.view));
+export function initViewsKeys()
+{
+    document.addEventListener("keydown", (event) =>
+    {
+        if (event.key != "Tab")
+            return;
+
+        event.preventDefault();
+
+        if (loading)
+            return;
+
+        const   step = event.shiftKey ? views.length - 1 : 1;
+
+        loadView((app.view + step) % views.length).catch(console.error);
+    });
 }
 
-// Crée un bouton numéroté par affichage disponible
-export function initViewsButtons()
+export function initGraphButtons()
 {
-    const   container = document.getElementById("views");
-
-    for (let index = 0; index < views.length; index++)
+    document.getElementById("graph-expand").addEventListener("click", () =>
     {
-        const   button = document.createElement("button");
+        if (app.expand != null)
+            app.expand();
+    });
 
-        button.className = "view-button";
-        button.textContent = index + 1;
+    document.getElementById("graph-collapse").addEventListener("click", () =>
+    {
+        if (app.collapse != null)
+            app.collapse();
+    });
+}
 
-        // Changement d'affichage au clic
-        button.addEventListener("click", () => loadView(index).catch(console.error));
+function updateGraphControls()
+{
+    document.getElementById("graph-controls").classList.toggle("hidden", app.expand == null);
 
-        container.appendChild(button);
-    }
+    if (app.reveal == null)
+        hideSearch();
+    else
+        showSearch();
 }
 
 // Remplace l'affichage courant par un autre
@@ -76,6 +95,8 @@ export async function loadView(index)
     // L'affichage demandé est déjà celui en cours
     if (app.view == index)
         return;
+
+    loading = true;
 
     showLoading();
 
@@ -90,15 +111,26 @@ export async function loadView(index)
 
     app.hierarchy = null;
     app.collapse = null;
+    app.expand = null;
+    app.reveal = null;
 
     // Remise à zéro des tags sélectionnés
     app.selectedTags = new Set();
     updateTagsBox();
 
-    updateViewsButtons();
+    updateGraphControls();
 
-    // Construction du nouvel affichage
-    await views[index]();
+    try
+    {
+        // Construction du nouvel affichage
+        await views[index]();
+    }
+    finally
+    {
+        loading = false;
+    }
+
+    updateGraphControls();
 
     hideLoading();
 }

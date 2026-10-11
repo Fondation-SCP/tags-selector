@@ -14,7 +14,10 @@
                 <h1>tags-selector</h1>
             </div>
 
-            <div id="views"></div>
+            <div id="search" class="hidden">
+                <input id="search-input" type="text" placeholder="Rechercher un tag..." autocomplete="off" spellcheck="false">
+                <ul id="search-results" class="hidden"></ul>
+            </div>
         </div>
 
         <div id="loading-overlay">
@@ -34,6 +37,11 @@
             <h3 id="selected-tags-title">Aucun tag sélectionné</h3>
             <div id="selected-tags-list"></div>
             <button id="selected-tags-reset">Réinitialiser</button>
+        </div>
+
+        <div id="graph-controls" class="hidden">
+            <button id="graph-expand" class="graph-button">Tout déployer</button>
+            <button id="graph-collapse" class="graph-button">Tout replier</button>
         </div>
 
         <!-- Comunica -->
