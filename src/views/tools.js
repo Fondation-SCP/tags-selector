@@ -6,6 +6,7 @@ import { registerBranchesEvents } from "../graph/branches/events.js";
 import { updateTagsBox } from "../selection/tools.js";
 import { showSearch, hideSearch } from "../search/tools.js";
 import { showLoading, hideLoading } from "../loading.js";
+import { hidePopup } from "../popup.js";
 
 // Affiche un message à la place d'un affichage non implémenté
 function showPlaceholder(number)
@@ -99,6 +100,7 @@ export async function loadView(index)
     loading = true;
 
     showLoading();
+    hidePopup();
 
     // Destruction du graphe de l'affichage précédent
     if (app.cy != null)
@@ -113,6 +115,7 @@ export async function loadView(index)
     app.collapse = null;
     app.expand = null;
     app.reveal = null;
+    app.explainConflict = null;
 
     // Remise à zéro des tags sélectionnés
     app.selectedTags = new Set();

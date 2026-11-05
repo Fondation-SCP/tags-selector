@@ -1,5 +1,5 @@
 import { app } from "../../main.js";
-import { getAll, getRoots, getUniques, getLinks } from "../../database/get.js";
+import { getAll, getRoots, getUniques, getLinks, getDisjoints } from "../../database/get.js";
 import { getTagName } from "../../database/tools.js";
 import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
@@ -7,7 +7,8 @@ import { initZonesLayer } from "./zones.js";
 
 export const   MISC_TAG = "divers";
 
-const   LABEL_FONT = "10px \"Helvetica Neue\", Helvetica, sans-serif";
+const   LABEL_FONT_SIZE = 10;
+const   LABEL_FONT_FAMILY = "Helvetica Neue, Helvetica, sans-serif";
 const   LABEL_MAX_WIDTH = 80;
 
 let     measureContext = null;
@@ -17,38 +18,46 @@ function measureLabel(text)
     if (measureContext == null)
     {
         measureContext = document.createElement("canvas").getContext("2d");
-        measureContext.font = LABEL_FONT;
+        measureContext.font = `${LABEL_FONT_SIZE}px ${LABEL_FONT_FAMILY}`;
     }
 
-    return measureContext.measureText(text).width;
+    return Math.ceil(measureContext.measureText(text).width);
 }
 
-function wrapTagName(name)
+function packLabel(pieces)
 {
-    const   parts = name.match(/[^-]*-|[^-]+/g);
-
-    if (parts == null)
-        return name;
-
     const   lines = [];
 
     let     current = "";
 
-    for (const part of parts)
+    for (const piece of pieces)
     {
-        if (current != "" && measureLabel(current + part) > LABEL_MAX_WIDTH)
+        if (current != "" && measureLabel(current + piece) > LABEL_MAX_WIDTH)
         {
             lines.push(current);
-            current = part;
+            current = piece;
         }
         else
-            current += part;
+            current += piece;
     }
 
     if (current != "")
         lines.push(current);
 
-    return lines.join("\n");
+    return lines;
+}
+
+function buildLabel(name)
+{
+    const   parts = name.match(/[^-]*-|[^-]+/g) ?? [name];
+    const   pieces = parts.flatMap(part => measureLabel(part) > LABEL_MAX_WIDTH ? packLabel([...part]) : [part]);
+    const   lines = packLabel(pieces);
+
+    return {
+        text: lines.join("\n"),
+        width: Math.max(0, ...lines.map(line => measureLabel(line))),
+        height: lines.length * LABEL_FONT_SIZE
+    };
 }
 
 const   TRUNK_TONES =
@@ -164,14 +173,14 @@ const   branchesStyle =
             shape: "round-rectangle",
 
             label: "data(wrapped)",
-            "font-family": "Helvetica Neue, Helvetica, sans-serif",
+            "font-family": LABEL_FONT_FAMILY,
+            "font-size": LABEL_FONT_SIZE,
 
-            width: "label",
-            height: "label",
+            width: "data(width)",
+            height: "data(height)",
             padding: 6,
 
-            "text-max-width": "80px",
-            "text-overflow-wrap": "anywhere"
+            "text-max-width": `${LABEL_MAX_WIDTH}px`
         }
     },
     {
@@ -190,10 +199,30 @@ const   branchesStyle =
         }
     },
     {
+        selector: "node.excluded",
+        style:
+        {
+            opacity: 0.75,
+            "background-color": "#e53935",
+            "border-color": "black",
+            color: "white"
+        }
+    },
+    {
         selector: "node.highlighted",
         style:
         {
             "underlay-color": "#ffc400",
+            "underlay-opacity": 0.8,
+            "underlay-padding": 8,
+            "underlay-shape": "round-rectangle"
+        }
+    },
+    {
+        selector: "node.conflict",
+        style:
+        {
+            "underlay-color": "#e53935",
             "underlay-opacity": 0.8,
             "underlay-padding": 8,
             "underlay-shape": "round-rectangle"
@@ -255,10 +284,12 @@ async function initBranchesData()
     const   roots = await getRoots();
     const   uniques = await getUniques();
     const   links = await getLinks();
+    const   disjoints = await getDisjoints();
 
     const   known = new Set(tags.map(element => element.get("element").value));
     const   children = new Map();
     const   parents = new Map();
+    const   pairs = new Map();
 
     for (const element of links)
     {
@@ -277,6 +308,17 @@ async function initBranchesData()
             parents.set(child, []);
 
         parents.get(child).push(parent);
+    }
+
+    for (const element of disjoints)
+    {
+        const   first = element.get("first").value;
+        const   second = element.get("second").value;
+
+        if (!known.has(first) || !known.has(second))
+            continue;
+
+        pairs.set([first, second].sort().join(" "), [first, second]);
     }
 
     for (const list of children.values())
@@ -298,7 +340,8 @@ async function initBranchesData()
         children: children,
         parents: parents,
         roots: list.sort(sortByName),
-        tags: [...known]
+        tags: [...known],
+        disjoints: [...pairs.values()]
     };
 }
 
@@ -341,6 +384,7 @@ export function isExpandable(url)
 export function buildTagNode(id, url, owner, order, depth, position)
 {
     const   name = getTagName(url);
+    const   label = buildLabel(name);
 
     return {
         data:
@@ -348,7 +392,9 @@ export function buildTagNode(id, url, owner, order, depth, position)
             id: id,
             url: url,
             label: name,
-            wrapped: wrapTagName(name),
+            wrapped: label.text,
+            width: label.width,
+            height: label.height,
             owner: owner,
             order: order,
             depth: depth

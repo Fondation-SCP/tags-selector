@@ -1,8 +1,10 @@
 import { app } from "../../main.js";
 import { updateTagsBox } from "../../selection/tools.js";
+import { showPopup } from "../../popup.js";
 import { getTagName } from "../../database/tools.js";
 import { buildTagNode, getTagPath, getTrunkColor, MISC_TAG } from "./init.js";
 import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
+import { addAncestors, findConflict, getConflict } from "./disjoint.js";
 
 const   ANIMATION_DURATION = 300;
 const   UNFURL_SPREAD = 250;
@@ -11,37 +13,56 @@ const   HIGHLIGHT_BLINKS = 3;
 const   HIGHLIGHT_STEP = 250;
 
 let     zoneOrder = 0;
-let     highlightTimers = [];
+const   blinkTimers = new Map();
 
 const   ZOOM_STEP = 1.15;
 const   WHEEL_LINE = 40;
 const   WHEEL_LIMIT = 120;
 
-function addAncestors(url, ancestors)
+function getSelectedUrls()
 {
-    for (const parent of app.hierarchy.parents.get(url) ?? [])
-    {
-        if (ancestors.has(parent))
-            continue;
-
-        ancestors.add(parent);
-        addAncestors(parent, ancestors);
-    }
+    return new Set(app.cy.nodes(".tag.selected").map(node => node.data("url")));
 }
 
 function updateSelection()
 {
-    const   selected = app.cy.nodes(".tag.selected");
-    const   urls = new Set(selected.map(node => node.data("url")));
+    const   urls = getSelectedUrls();
     const   required = new Set();
 
     urls.forEach(url => addAncestors(url, required));
 
-    app.cy.nodes(".tag").forEach(node => node.toggleClass("implied", required.has(node.data("url")) && !node.hasClass("selected")));
+    const   closure = new Set([...required, ...urls]);
 
-    app.selectedTags = new Set([...required, ...urls].map(getTagName));
+    app.cy.nodes(".tag").forEach((node) =>
+    {
+        const   url = node.data("url");
+
+        node.toggleClass("implied", required.has(url) && !node.hasClass("selected"));
+        node.toggleClass("excluded", findConflict(url, closure) != null);
+    });
+
+    app.selectedTags = new Set([...closure].map(getTagName));
 
     updateTagsBox();
+}
+
+function explainConflict(url)
+{
+    const   conflict = getConflict(url, getSelectedUrls());
+
+    return conflict == null ? null : conflict.text;
+}
+
+function showConflict(node)
+{
+    const   conflict = getConflict(node.data("url"), getSelectedUrls());
+
+    if (conflict == null)
+        return;
+
+    showPopup("Tag incompatible", conflict.message);
+
+    blink(app.cy.nodes(".tag").filter(other => conflict.causes.has(other.data("url"))), "conflict", 0);
 }
 
 function createBranches(elements, ownerId, items, depth, position, delays, counter, color, avoided)
@@ -340,26 +361,31 @@ function revealTag(url)
         { duration: ANIMATION_DURATION }
     );
 
-    highlight(node);
+    blink(node, "highlighted", ANIMATION_DURATION);
 }
 
-function highlight(node)
+function blink(nodes, name, delay)
 {
-    highlightTimers.forEach(timer => clearTimeout(timer));
-    app.cy.nodes(".highlighted").removeClass("highlighted");
+    (blinkTimers.get(name) ?? []).forEach(timer => clearTimeout(timer));
+    app.cy.nodes(`.${name}`).removeClass(name);
 
-    highlightTimers = [];
+    const   timers = [];
 
     for (let index = 0; index < HIGHLIGHT_BLINKS * 2; index++)
     {
         const   timer = setTimeout(() =>
         {
-            if (node.cy() == app.cy && !node.removed())
-                node.toggleClass("highlighted", index % 2 == 0);
-        }, ANIMATION_DURATION + index * HIGHLIGHT_STEP);
+            nodes.forEach((node) =>
+            {
+                if (node.cy() == app.cy && !node.removed())
+                    node.toggleClass(name, index % 2 == 0);
+            });
+        }, delay + index * HIGHLIGHT_STEP);
 
-        highlightTimers.push(timer);
+        timers.push(timer);
     }
+
+    blinkTimers.set(name, timers);
 }
 
 function getWheelSteps(event)
@@ -409,6 +435,7 @@ export function registerBranchesEvents()
     app.collapse = collapseAll;
     app.expand = expandAll;
     app.reveal = revealTag;
+    app.explainConflict = explainConflict;
 
     app.cy.on("viewport", () =>
     {
@@ -420,12 +447,19 @@ export function registerBranchesEvents()
         clamping = false;
     });
 
-    app.cy.on("mouseover", "node.tag", () => {
-        app.cy.container().style.cursor = "pointer";
+    app.cy.on("mouseover", "node.tag", (event) =>
+    {
+        const   container = app.cy.container();
+        const   text = event.target.hasClass("excluded") ? explainConflict(event.target.data("url")) : null;
+
+        container.style.cursor = text == null ? "pointer" : "not-allowed";
+        container.title = text ?? "";
     });
 
-    app.cy.on("mouseout", "node.tag", () => {
+    app.cy.on("mouseout", "node.tag", () =>
+    {
         app.cy.container().style.cursor = "default";
+        app.cy.container().title = "";
     });
 
     app.cy.on("tap", "node.tag", (event) =>
@@ -435,6 +469,12 @@ export function registerBranchesEvents()
         if (node.data("url") == MISC_TAG)
         {
             toggleBranch(node);
+            return;
+        }
+
+        if (node.hasClass("excluded"))
+        {
+            showConflict(node);
             return;
         }
 

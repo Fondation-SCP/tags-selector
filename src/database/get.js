@@ -83,3 +83,38 @@ export async function getLinks()
 
     return await stream.toArray();
 }
+
+export async function getDisjoints()
+{
+    const   query = `
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        SELECT DISTINCT ?first ?second
+        WHERE {
+            {
+                ?first owl:disjointWith ?second .
+            }
+            UNION
+            {
+                {
+                    ?group a owl:AllDisjointClasses ;
+                        owl:members ?members .
+                }
+                UNION
+                {
+                    ?union owl:disjointUnionOf ?members .
+                }
+
+                ?members rdf:rest*/rdf:first ?first .
+                ?members rdf:rest*/rdf:first ?second .
+
+                FILTER (?first != ?second)
+            }
+        }
+        `;
+
+    const   stream = await get(query);
+
+    return await stream.toArray();
+}

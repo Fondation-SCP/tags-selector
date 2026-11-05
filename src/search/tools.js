@@ -97,9 +97,14 @@ function renderResults()
     results.forEach((result, index) =>
     {
         const   item = document.createElement("li");
+        const   conflict = app.explainConflict != null ? app.explainConflict(result.url) : null;
 
         item.textContent = result.name;
         item.classList.toggle("active", index == active);
+        item.classList.toggle("excluded", conflict != null);
+
+        if (conflict != null)
+            item.title = conflict;
 
         item.addEventListener("mousedown", (event) =>
         {

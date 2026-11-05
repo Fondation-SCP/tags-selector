@@ -2,6 +2,7 @@ import { loadRdf } from "./database/tools.js";
 import { initViewsKeys, initGraphButtons, loadView } from "./views/tools.js";
 import { initTagsBox } from "./selection/tools.js";
 import { initSearch } from "./search/tools.js";
+import { initPopup } from "./popup.js";
 import { failLoading } from "./loading.js";
 
 // Données globales de l'application
@@ -23,6 +24,7 @@ export const app =
     collapse: null,
     expand: null,
     reveal: null,
+    explainConflict: null,
 
     // Affichage courant
     view: null,
@@ -49,6 +51,8 @@ async function main()
     initGraphButtons();
 
     initSearch();
+
+    initPopup();
 
     // Chargement de l'affichage par défaut
     await loadView(0);
