@@ -204,6 +204,11 @@ html, body
     animation: loading-spin 2s linear infinite;
 }
 
+#loading-spinner.hidden
+{
+    display: none;
+}
+
 #loading-text
 {
     margin: 0;
@@ -262,7 +267,7 @@ html, body
     position: fixed;
     inset: 0;
 
-    z-index: 100;
+    z-index: 1100;
 
     display: flex;
     align-items: center;
@@ -324,6 +329,7 @@ html, body
 
     text-align: left;
     white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 
 #popup-text em

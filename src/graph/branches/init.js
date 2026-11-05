@@ -4,6 +4,7 @@ import { getTagName } from "../../database/tools.js";
 import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
 import { initZonesLayer } from "./zones.js";
+import { LoadError } from "../../loading.js";
 
 export const   MISC_TAG = "divers";
 
@@ -335,6 +336,9 @@ async function initBranchesData()
         list.push(MISC_TAG);
     }
 
+    if (list.length == 0)
+        throw new LoadError("Hiérarchie invalide", ["Aucun tag racine n'a été trouvé : chaque tag est déclaré sous-tag d'un autre (cycle de ", { italic: "rdfs:subClassOf" }, " ou parent non déclaré comme ", { italic: "owl:Class" }, ")."]);
+
     app.hierarchy =
     {
         children: children,
@@ -374,6 +378,26 @@ export function getTagPath(url)
         path.unshift(current);
 
     return path;
+}
+
+export function getUnreachableTags()
+{
+    const   reached = new Set(app.hierarchy.roots);
+    const   queue = [...app.hierarchy.roots];
+
+    for (let index = 0; index < queue.length; index++)
+    {
+        for (const child of app.hierarchy.children.get(queue[index]) ?? [])
+        {
+            if (reached.has(child))
+                continue;
+
+            reached.add(child);
+            queue.push(child);
+        }
+    }
+
+    return app.hierarchy.tags.filter(url => !reached.has(url)).sort((first, second) => getTagName(first).localeCompare(getTagName(second)));
 }
 
 export function isExpandable(url)

@@ -1,9 +1,13 @@
-import { loadRdf } from "./database/tools.js";
+import { loadRdf, getTagName } from "./database/tools.js";
+import { getAll } from "./database/get.js";
+import { getUnreachableTags } from "./graph/branches/init.js";
 import { initViewsKeys, initGraphButtons, loadView } from "./views/tools.js";
 import { initTagsBox } from "./selection/tools.js";
 import { initSearch } from "./search/tools.js";
-import { initPopup } from "./popup.js";
-import { failLoading } from "./loading.js";
+import { initPopup, showPopup } from "./popup.js";
+import { LoadError, checkLibrary, failLoading } from "./loading.js";
+
+const   UNREACHABLE_SHOWN = 10;
 
 // Données globales de l'application
 export const app =
@@ -33,9 +37,51 @@ export const app =
     selectedTags: []
 }
 
+async function checkOntology()
+{
+    let     tags;
+
+    try
+    {
+        tags = await getAll();
+    }
+    catch (error)
+    {
+        throw new LoadError("RDF invalide", ["Le fichier de l'ontologie est un XML valide, mais pas un RDF/XML correct :\n\n", { italic: error.message }], error);
+    }
+
+    if (tags.length == 0)
+        throw new LoadError("Ontologie vide", ["Aucun tag n'a été trouvé : l'ontologie ne déclare aucune classe ", { italic: "owl:Class" }, "."]);
+}
+
+function warnUnreachable()
+{
+    const   tags = getUnreachableTags();
+
+    if (tags.length == 0)
+        return;
+
+    const   message = ["Ces tags ne descendent d'aucune racine et n'apparaissent pas dans le graphe :\n"];
+
+    for (const url of tags.slice(0, UNREACHABLE_SHOWN))
+        message.push("\n", { italic: getTagName(url) });
+
+    if (tags.length > UNREACHABLE_SHOWN)
+        message.push(`\n… et ${tags.length - UNREACHABLE_SHOWN} autres`);
+
+    message.push("\n\nLeur ascendance passe par une classe non déclarée comme ", { italic: "owl:Class" }, ", ou forme un cycle de ", { italic: "rdfs:subClassOf" }, ".");
+
+    showPopup("Tags non rattachés", message);
+}
+
 // Point de départ du programme
 async function main()
 {
+    initPopup();
+
+    checkLibrary("Comunica", typeof Comunica != "undefined");
+    checkLibrary("Cytoscape.js", typeof cytoscape != "undefined");
+
     // URL du fichier .rdf de l'ontologie
     app.rdfUrl = "https://Fondation-SCP.github.io/tags-selector/resources/ontology/structure-tags.rdf";
     // Téléchargement du .rdf
@@ -44,7 +90,7 @@ async function main()
     // Instanciation de Comunica pour faire des requêtes SPARQL au fichier .rdf
     app.engine = new Comunica.QueryEngine();
 
-    initViewsKeys();
+    await checkOntology();
 
     initTagsBox();
 
@@ -52,15 +98,13 @@ async function main()
 
     initSearch();
 
-    initPopup();
-
     // Chargement de l'affichage par défaut
     await loadView(0);
+
+    initViewsKeys();
+
+    warnUnreachable();
 }
 
 // Affichage d'un message d'erreur si le chargement échoue
-main().catch((error) =>
-{
-    console.error(error);
-    failLoading();
-});
+main().catch(failLoading);

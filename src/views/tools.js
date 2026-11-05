@@ -5,7 +5,7 @@ import { initBranchesGraph } from "../graph/branches/init.js";
 import { registerBranchesEvents } from "../graph/branches/events.js";
 import { updateTagsBox } from "../selection/tools.js";
 import { showSearch, hideSearch } from "../search/tools.js";
-import { showLoading, hideLoading } from "../loading.js";
+import { showLoading, hideLoading, failLoading, checkLibrary } from "../loading.js";
 import { hidePopup } from "../popup.js";
 
 // Affiche un message à la place d'un affichage non implémenté
@@ -38,6 +38,8 @@ export const views =
 
     async () =>
     {
+        checkLibrary("cytoscape-dagre", cytoscape("layout", "dagre") != null);
+
         // Initialisation du graphe
         await initGraph();
         // Enregistrement des événements relatifs au graphe
@@ -61,7 +63,7 @@ export function initViewsKeys()
 
         const   step = event.shiftKey ? views.length - 1 : 1;
 
-        loadView((app.view + step) % views.length).catch(console.error);
+        loadView((app.view + step) % views.length).catch(failLoading);
     });
 }
 
