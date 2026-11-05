@@ -1,7 +1,6 @@
 import { app } from "../../main.js";
 import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../../database/get.js";
 import { getTagName } from "../../database/tools.js";
-import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
 import { initZonesLayer } from "./zones.js";
 import { LoadError } from "../../loading.js";
@@ -177,6 +176,18 @@ const   branchesStyle =
             "font-family": LABEL_FONT_FAMILY,
             "font-size": LABEL_FONT_SIZE,
 
+            "overlay-opacity": 0,
+
+            "text-wrap": "wrap",
+            "text-valign": "center",
+            "text-halign": "center",
+
+            "background-color": "white",
+            color: "black",
+
+            "border-width": 2,
+            "border-color": "#555",
+
             width: "data(width)",
             height: "data(height)",
             padding: 6,
@@ -190,6 +201,14 @@ const   branchesStyle =
         {
             "border-width": 4,
             "border-color": "#333"
+        }
+    },
+    {
+        selector: "node.selected",
+        style:
+        {
+            "background-color": "green",
+            color: "white"
         }
     },
     {
@@ -259,6 +278,10 @@ const   branchesStyle =
             width: "data(width)",
             "line-color": "data(color)"
         }
+    },
+    {
+        selector: "core",
+        style: { "active-bg-opacity": 0 }
     }
 ];
 
@@ -273,7 +296,7 @@ function initBranchesBase()
 
         elements: [],
 
-        style: [...baseStyle, ...branchesStyle]
+        style: branchesStyle
     });
 
     initZonesLayer();
@@ -366,10 +389,7 @@ async function initBranchesData()
 
 export function findTag(name)
 {
-    if (app.hierarchy == null)
-        return null;
-
-    return app.hierarchy.urls.get(name) ?? null;
+    return app.hierarchy.urls.get(name);
 }
 
 export function getTagPath(url)
@@ -438,7 +458,6 @@ export function buildTagNode(id, url, owner, order, depth, position)
         {
             id: id,
             url: url,
-            label: name,
             wrapped: label.text,
             width: label.width,
             height: label.height,

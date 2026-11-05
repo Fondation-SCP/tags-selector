@@ -1,4 +1,4 @@
-import { app } from "../main.js";
+import { changeSelection } from "../graph/branches/events.js";
 import { isPopupOpen } from "../popup.js";
 
 const   HISTORY_LIMIT = 100;
@@ -52,7 +52,7 @@ function moveHistory(step)
 
     updateButtons();
 
-    app.select(entries[position]);
+    changeSelection(entries[position]);
 }
 
 function isBusy(target)

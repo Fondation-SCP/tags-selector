@@ -1,5 +1,6 @@
 import { app } from "../main.js";
 import { findTag } from "../graph/branches/init.js";
+import { clearSelection, deselectTag, revealTag } from "../graph/branches/events.js";
 import { showPopup } from "../popup.js";
 
 const   COPY_FEEDBACK = 1500;
@@ -14,22 +15,18 @@ function buildChip(name)
 
     chip.className = "selected-tag";
 
-    label.textContent = name;
-    chip.appendChild(label);
-
-    if (url == null)
-        return chip;
-
     const   remove = document.createElement("button");
 
+    label.textContent = name;
     label.classList.add("clickable");
-    label.addEventListener("click", () => app.reveal(url));
+    label.addEventListener("click", () => revealTag(url));
 
     remove.className = "selected-tag-remove";
     remove.textContent = "×";
     remove.title = "Retirer de la sélection";
-    remove.addEventListener("click", () => app.deselect(url));
+    remove.addEventListener("click", () => deselectTag(url));
 
+    chip.appendChild(label);
     chip.appendChild(remove);
 
     return chip;
@@ -79,40 +76,8 @@ async function copyTags()
     copyTimer = setTimeout(() => button.textContent = "Copier", COPY_FEEDBACK);
 }
 
-export function clearTags()
-{
-    if (app.clear != null)
-    {
-        app.clear();
-        return;
-    }
-
-    if (app.cy != null)
-        app.cy.nodes(".selected").removeClass("selected");
-
-    app.selectedTags = new Set();
-
-    updateTagsBox();
-}
-
 export function initTagsBox()
 {
-    document.getElementById("selected-tags-reset").addEventListener("click", clearTags);
+    document.getElementById("selected-tags-reset").addEventListener("click", clearSelection);
     document.getElementById("selected-tags-copy").addEventListener("click", copyTags);
-}
-
-// Ajoute un tag à la variable globale et à la page
-export function addTag(tagName)
-{
-    app.selectedTags.add(tagName);
-
-    updateTagsBox();
-}
-
-// Retire un tag à la variable globale et à la page
-export function removeTag(tagName)
-{
-    app.selectedTags.delete(tagName);
-
-    updateTagsBox();
 }

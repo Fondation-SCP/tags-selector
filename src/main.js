@@ -1,7 +1,7 @@
 import { loadRdf, getTagName } from "./database/tools.js";
 import { getAll } from "./database/get.js";
 import { getUnreachableTags } from "./graph/branches/init.js";
-import { initViewsKeys, initGraphButtons, loadView } from "./views/tools.js";
+import { initGraphButtons, loadView } from "./views/tools.js";
 import { initTagsBox } from "./selection/tools.js";
 import { initHistory } from "./selection/history.js";
 import { initSearch } from "./search/tools.js";
@@ -28,17 +28,6 @@ export const app =
     cy: null,
 
     hierarchy: null,
-
-    collapse: null,
-    expand: null,
-    reveal: null,
-    select: null,
-    deselect: null,
-    clear: null,
-    explainConflict: null,
-
-    // Affichage courant
-    view: null,
 
     // Tags sélectionnés
     selectedTags: []
@@ -115,10 +104,8 @@ async function main()
 
     initLocalRdf();
 
-    // Chargement de l'affichage par défaut
-    await loadView(0);
-
-    initViewsKeys();
+    // Chargement de l'affichage
+    await loadView();
 
     warnUnreachable();
 }

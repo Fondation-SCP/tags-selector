@@ -17,7 +17,7 @@
                 <span id="ontology-source" class="hidden"></span>
             </div>
 
-            <div id="search" class="hidden">
+            <div id="search">
                 <input id="search-input" type="text" placeholder="Rechercher un tag..." autocomplete="off" spellcheck="false">
                 <ul id="search-results" class="hidden"></ul>
             </div>
@@ -32,9 +32,6 @@
 
         <!-- Graphe -->
         <div id="cy"></div>
-
-        <!-- Affichages non implémentés -->
-        <div id="placeholder" class="hidden"></div>
 
         <div id="tag-info" class="hidden">
             <h3 id="tag-info-name"></h3>
@@ -65,7 +62,7 @@
             </div>
         </div>
 
-        <div id="graph-controls" class="hidden">
+        <div id="graph-controls">
             <button id="history-undo" class="graph-button" title="Annuler (Ctrl+Z)" disabled>↶</button>
             <button id="history-redo" class="graph-button" title="Rétablir (Ctrl+Y)" disabled>↷</button>
             <button id="rdf-open" class="graph-button" title="Remplacer l'ontologie par un fichier local, sans le publier">Charger un .rdf</button>
@@ -80,9 +77,6 @@
 
         <!-- Cytoscape.js -->
         <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.33.1/dist/cytoscape.min.js"></script>
-
-        <!-- Dagre -->
-        <script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@4.0.0/dist/cytoscape-dagre.js"></script>
 
         <script src="src/fallback.js"></script>
         <script type="module" src="src/main.js" onerror="failScripts()"></script>

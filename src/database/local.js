@@ -1,6 +1,6 @@
 import { app, checkOntology, warnUnreachable } from "../main.js";
 import { checkRdf } from "./tools.js";
-import { reloadView } from "../views/tools.js";
+import { loadView } from "../views/tools.js";
 import { failLoading, hideLoading, showLoadError, showLoading } from "../loading.js";
 
 export function showOntologySource(text)
@@ -37,13 +37,13 @@ async function loadLocalRdf(file)
 
     try
     {
-        await reloadView();
+        await loadView();
     }
     catch (error)
     {
         app.rdf = previous;
 
-        await reloadView().catch(failLoading);
+        await loadView().catch(failLoading);
 
         showLoadError(error);
         return;

@@ -59,7 +59,7 @@ function updateSelection()
     recordSelection([...urls]);
 }
 
-function explainConflict(url)
+export function explainConflict(url)
 {
     const   conflict = getConflict(url, getSelectedUrls());
 
@@ -284,7 +284,7 @@ function fitGraph()
     }
 }
 
-function collapseAll()
+export function collapseAll()
 {
     app.cy.elements().stop(true);
     app.cy.nodes(".leaving").remove();
@@ -298,7 +298,7 @@ function collapseAll()
     fitGraph();
 }
 
-function expandAll()
+export function expandAll()
 {
     app.cy.elements().stop(true);
     app.cy.nodes(".leaving").remove();
@@ -358,7 +358,7 @@ function openTag(url, delays)
     return node;
 }
 
-function changeSelection(urls)
+export function changeSelection(urls)
 {
     app.cy.elements().stop(true);
     app.cy.nodes(".leaving").remove();
@@ -398,19 +398,19 @@ function changeSelection(urls)
     updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
 }
 
-function deselectTag(url)
+export function deselectTag(url)
 {
     changeSelection([...getSelectedUrls()].filter(selected => !getClosure([selected]).has(url)));
 }
 
-function clearSelection()
+export function clearSelection()
 {
     app.cy.nodes(".tag.selected").removeClass("selected");
 
     updateSelection();
 }
 
-function revealTag(url)
+export function revealTag(url)
 {
     app.cy.nodes(".leaving").remove();
 
@@ -505,14 +505,6 @@ export function registerBranchesEvents()
     registerWheelZoom();
 
     let     clamping = false;
-
-    app.collapse = collapseAll;
-    app.expand = expandAll;
-    app.reveal = revealTag;
-    app.select = changeSelection;
-    app.deselect = deselectTag;
-    app.clear = clearSelection;
-    app.explainConflict = explainConflict;
 
     app.cy.on("viewport", () =>
     {

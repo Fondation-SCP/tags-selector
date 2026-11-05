@@ -1,5 +1,6 @@
 import { app } from "../main.js";
 import { getTagName } from "../database/tools.js";
+import { explainConflict, revealTag } from "../graph/branches/events.js";
 
 const   MAX_RESULTS = 10;
 
@@ -97,7 +98,7 @@ function renderResults()
     results.forEach((result, index) =>
     {
         const   item = document.createElement("li");
-        const   conflict = app.explainConflict != null ? app.explainConflict(result.url) : null;
+        const   conflict = explainConflict(result.url);
 
         item.textContent = result.name;
         item.classList.toggle("active", index == active);
@@ -157,8 +158,7 @@ function pickResult(index)
 
     closeResults();
 
-    if (app.reveal != null)
-        app.reveal(result.url);
+    revealTag(result.url);
 }
 
 export function initSearch()
@@ -189,21 +189,4 @@ export function initSearch()
         else if (event.key == "Escape")
             input.blur();
     });
-}
-
-export function showSearch()
-{
-    document.getElementById("search").classList.remove("hidden");
-}
-
-export function hideSearch()
-{
-    const   input = document.getElementById("search-input");
-
-    input.value = "";
-    input.blur();
-
-    closeResults();
-
-    document.getElementById("search").classList.add("hidden");
 }

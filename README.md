@@ -6,22 +6,20 @@ L'ontologie est interrogée en `SPARQL` et affichée sous forme de graphe intera
 
 La sélection se copie au format Wikidot et s'annule (`Ctrl+Z` / `Ctrl+Y`). Le survol d'un tag affiche sa définition (`rdfs:comment`). Une autre ontologie peut être chargée depuis un fichier local (bouton « Charger un .rdf ») ou une URL (`?rdf=…`). Un clic sur le logo ou le titre recharge la page, après confirmation.
 
-L'application tourne entièrement dans le navigateur, sans étape de compilation (`Comunica`, `Cytoscape.js`, `Dagre`).
+L'application tourne entièrement dans le navigateur, sans étape de compilation (`Comunica`, `Cytoscape.js`).
 
 ## Hiérarchie
 
 – `src/database/` : interaction avec la base de données (en `SPARQL`), chargement d'une ontologie depuis un fichier local  
-– `src/graph/` : initialisation et interaction avec le graphe  
-– `src/graph/branches/` : initialisation et interaction avec le graphe en branches (construction et placement des branches, événements, zones colorées, déploiement et repli complets, affichage d'un tag recherché, ajout automatique des tags parents, blocage des tags disjoints de la sélection, application d'une sélection complète, panneau de définition d'un tag)  
+– `src/graph/branches/` : initialisation et interaction avec le graphe en branches (style, construction et placement des branches, événements, zones colorées, déploiement et repli complets, affichage d'un tag recherché, ajout automatique des tags parents, blocage des tags disjoints de la sélection, application d'une sélection complète, panneau de définition d'un tag)  
 – `src/selection/` : interaction avec la liste de tags sélectionnés (encart interactif, copie au format Wikidot, désélection complète sans repli du graphe, historique annuler / rétablir)  
 – `src/search/` : champ de recherche de tags et menu déroulant des tags les plus proches  
-– `src/views/` : liste des affichages disponibles, passage de l'un à l'autre (touche `Tab`), boutons de déploiement et de repli du graphe  
+– `src/views/` : construction de l'affichage (et reconstruction après chargement d'une ontologie locale), boutons de déploiement et de repli du graphe  
 
-– `src/events.js` : écoute des événements d'interaction avec le graphe  
 – `src/loading.js` : affichage, masquage et mise en erreur de l'écran de chargement  
 – `src/popup.js` : pop up avec bouton OK (raison du blocage d'un tag disjoint, tags non rattachés) ou de confirmation, affichées l'une après l'autre si plusieurs arrivent en même temps  
 – `src/refresh.js` : rechargement de la page au clic sur le logo ou le titre, après confirmation  
-– `src/main.js` : définition de la variable globale `app`, création de la base de données et du moteur `Comunica` (pour interagir avec), du changement d'affichage, de la recherche, des boutons de déploiement, de la boite des tags sélectionnés, de l'historique, du rafraîchissement et du chargement d'une ontologie locale  
+– `src/main.js` : définition de la variable globale `app`, création de la base de données et du moteur `Comunica` (pour interagir avec), de l'affichage, de la recherche, des boutons de déploiement, de la boite des tags sélectionnés, de l'historique, du rafraîchissement et du chargement d'une ontologie locale  
 
 – `resources/ontology/structure-tags.rdf` : ontologie des tags (servie via `Github Pages`)  
 – `resources/scp-logo.svg` : logo affiché dans l'en-tête et sur l'écran de chargement  

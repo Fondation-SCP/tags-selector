@@ -84,11 +84,6 @@ html, body
     pointer-events: auto;
 }
 
-#search.hidden
-{
-    display: none;
-}
-
 #search-input
 {
     box-sizing: border-box;
@@ -176,29 +171,6 @@ html, body
     inset: 0;
 
     background: white;
-}
-
-#placeholder
-{
-    position: fixed;
-    inset: 0;
-
-    z-index: 5;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: white;
-
-    font-family: sans-serif;
-    font-size: 16px;
-    color: #666;
-}
-
-#placeholder.hidden
-{
-    display: none;
 }
 
 #loading-overlay
@@ -568,11 +540,6 @@ html, body
     display: flex;
 
     gap: 8px;
-}
-
-#graph-controls.hidden
-{
-    display: none;
 }
 
 .graph-button
