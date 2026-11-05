@@ -80,9 +80,7 @@ export function getConflict(url, urls)
     if (conflict.own != url)
         message.push("\n", tag(url), " est un sous-tag de ", tag(conflict.own), ".");
 
-    if (urls.has(conflict.other))
-        message.push("\n", tag(conflict.other), " est sélectionné.");
-    else
+    if (!urls.has(conflict.other))
         message.push("\n", tag(conflict.other), " est sélectionné automatiquement en tant que parent de ", ...listTags(sources), ".");
 
     message.push("\n\nDésélectionnez d'abord ", ...listTags(sources), " pour lever cette incompatibilité.");

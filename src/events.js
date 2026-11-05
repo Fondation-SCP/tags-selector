@@ -1,12 +1,10 @@
 import { app } from "./main.js";
 import { addTag, removeTag } from "./selection/tools.js";
-import { showDirectSubNodes, getAllSubNodes, updateLayout, collapseGraph } from "./graph/tools.js";
+import { showDirectSubNodes, getAllSubNodes, updateLayout } from "./graph/tools.js";
 
 // Enregistrement des événements relatifs au graphe
 export function registerGraphEvents()
 {
-    app.collapse = collapseGraph;
-
     // Changement de curseur en cas de survol d'un noeud
     app.cy.on("mouseover", "node", () => {
         app.cy.container().style.cursor = "pointer";

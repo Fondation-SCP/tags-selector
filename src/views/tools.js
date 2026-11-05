@@ -4,9 +4,11 @@ import { registerGraphEvents } from "../events.js";
 import { initBranchesGraph } from "../graph/branches/init.js";
 import { registerBranchesEvents } from "../graph/branches/events.js";
 import { updateTagsBox } from "../selection/tools.js";
+import { resetHistory } from "../selection/history.js";
 import { showSearch, hideSearch } from "../search/tools.js";
 import { showLoading, hideLoading, failLoading, checkLibrary } from "../loading.js";
-import { hidePopup } from "../popup.js";
+import { clearPopups, isPopupOpen } from "../popup.js";
+import { hideTagInfo } from "../graph/branches/info.js";
 
 // Affiche un message à la place d'un affichage non implémenté
 function showPlaceholder(number)
@@ -53,7 +55,7 @@ export function initViewsKeys()
 {
     document.addEventListener("keydown", (event) =>
     {
-        if (event.key != "Tab")
+        if (event.key != "Tab" || isPopupOpen())
             return;
 
         event.preventDefault();
@@ -93,16 +95,17 @@ function updateGraphControls()
 }
 
 // Remplace l'affichage courant par un autre
-export async function loadView(index)
+export async function loadView(index, force)
 {
     // L'affichage demandé est déjà celui en cours
-    if (app.view == index)
+    if (app.view == index && !force)
         return;
 
     loading = true;
 
     showLoading();
-    hidePopup();
+    clearPopups();
+    hideTagInfo();
 
     // Destruction du graphe de l'affichage précédent
     if (app.cy != null)
@@ -117,11 +120,16 @@ export async function loadView(index)
     app.collapse = null;
     app.expand = null;
     app.reveal = null;
+    app.select = null;
+    app.deselect = null;
+    app.clear = null;
     app.explainConflict = null;
 
     // Remise à zéro des tags sélectionnés
     app.selectedTags = new Set();
     updateTagsBox();
+
+    resetHistory();
 
     updateGraphControls();
 
@@ -138,4 +146,9 @@ export async function loadView(index)
     updateGraphControls();
 
     hideLoading();
+}
+
+export async function reloadView()
+{
+    await loadView(app.view, true);
 }

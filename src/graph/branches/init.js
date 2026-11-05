@@ -1,5 +1,5 @@
 import { app } from "../../main.js";
-import { getAll, getRoots, getUniques, getLinks, getDisjoints } from "../../database/get.js";
+import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../../database/get.js";
 import { getTagName } from "../../database/tools.js";
 import { baseStyle } from "../style.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
@@ -286,11 +286,24 @@ async function initBranchesData()
     const   uniques = await getUniques();
     const   links = await getLinks();
     const   disjoints = await getDisjoints();
+    const   comments = await getComments();
 
     const   known = new Set(tags.map(element => element.get("element").value));
     const   children = new Map();
     const   parents = new Map();
     const   pairs = new Map();
+    const   notes = new Map();
+    const   urls = new Map([...known].map(url => [getTagName(url), url]));
+
+    for (const element of comments)
+    {
+        const   url = element.get("element").value;
+
+        if (!notes.has(url))
+            notes.set(url, []);
+
+        notes.get(url).push(element.get("comment").value);
+    }
 
     for (const element of links)
     {
@@ -345,8 +358,18 @@ async function initBranchesData()
         parents: parents,
         roots: list.sort(sortByName),
         tags: [...known],
+        urls: urls,
+        comments: notes,
         disjoints: [...pairs.values()]
     };
+}
+
+export function findTag(name)
+{
+    if (app.hierarchy == null)
+        return null;
+
+    return app.hierarchy.urls.get(name) ?? null;
 }
 
 export function getTagPath(url)

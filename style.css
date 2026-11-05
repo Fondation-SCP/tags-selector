@@ -34,9 +34,39 @@ html, body
     gap: 12px;
 }
 
+#refresh
+{
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 #title h1
 {
     margin: 0;
+}
+
+#ontology-source
+{
+    padding: 4px 8px;
+
+    background: #fff3cd;
+    color: #664d03;
+
+    border: 1px solid #e0c36c;
+    border-radius: 6px;
+
+    font-family: sans-serif;
+    font-size: 12px;
+}
+
+#ontology-source.hidden
+{
+    display: none;
 }
 
 .scp-logo
@@ -66,11 +96,13 @@ html, body
 
     padding: 8px 12px;
 
-    background: white;
-    color: #333;
+    background: rgba(40, 40, 40, 0.95);
+    color: white;
 
     border: 1px solid #666;
     border-radius: 8px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 
     font-family: sans-serif;
     font-size: 14px;
@@ -78,9 +110,14 @@ html, body
     outline: none;
 }
 
+#search-input::placeholder
+{
+    color: #aaa;
+}
+
 #search-input:focus
 {
-    border-color: #333;
+    border-color: #aaa;
 }
 
 #search-results
@@ -256,10 +293,65 @@ html, body
 
 #selected-tags-list
 {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+
     margin: 0;
 
     max-height: 30vh;
     overflow-y: auto;
+}
+
+.selected-tag
+{
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 2px 8px;
+
+    background: green;
+    color: white;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    font-size: 13px;
+}
+
+.selected-tag .clickable
+{
+    cursor: pointer;
+}
+
+.selected-tag .clickable:hover
+{
+    text-decoration: underline;
+}
+
+.selected-tag-remove
+{
+    padding: 0;
+
+    background: none;
+    color: inherit;
+
+    border: none;
+
+    font-size: 14px;
+    line-height: 1;
+
+    opacity: 0.7;
+
+    cursor: pointer;
+}
+
+.selected-tag-remove:hover
+{
+    opacity: 1;
 }
 
 #popup-overlay
@@ -337,7 +429,14 @@ html, body
     font-weight: bold;
 }
 
-#popup-ok
+#popup-buttons
+{
+    display: flex;
+
+    gap: 8px;
+}
+
+#popup-ok, #popup-cancel
 {
     padding: 6px 24px;
 
@@ -353,17 +452,29 @@ html, body
     cursor: pointer;
 }
 
-#popup-ok:hover
+#popup-ok:hover, #popup-cancel:hover
 {
     background: #eee;
 }
 
-#selected-tags-reset
+#popup-cancel.hidden
 {
-    display: block;
-    width: 100%;
+    display: none;
+}
+
+#selected-tags-actions
+{
+    display: flex;
+
+    gap: 8px;
 
     margin-top: 10px;
+}
+
+#selected-tags-actions button
+{
+    flex: 1;
+
     padding: 6px;
 
     background: transparent;
@@ -377,9 +488,74 @@ html, body
     cursor: pointer;
 }
 
-#selected-tags-reset:hover
+#selected-tags-actions button:hover
 {
     background: rgba(255, 255, 255, 0.12);
+}
+
+#tag-info
+{
+    position: fixed;
+
+    bottom: 66px;
+    right: 20px;
+
+    z-index: 5;
+
+    box-sizing: border-box;
+    width: 260px;
+
+    padding: 12px;
+
+    background: rgba(40, 40, 40, 0.95);
+    color: white;
+
+    border: 1px solid #666;
+    border-radius: 8px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    font-family: sans-serif;
+    font-size: 13px;
+
+    pointer-events: none;
+}
+
+#tag-info.hidden
+{
+    display: none;
+}
+
+#tag-info-name
+{
+    margin: 0;
+
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+
+#tag-info p
+{
+    margin: 8px 0 0 0;
+
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+#tag-info-parents
+{
+    color: #bbb;
+}
+
+#tag-info-parents.hidden
+{
+    display: none;
+}
+
+#tag-info-comment.empty
+{
+    color: #999;
+    font-style: italic;
 }
 
 #graph-controls
@@ -420,4 +596,16 @@ html, body
 .graph-button:hover
 {
     background: rgba(70, 70, 70, 0.95);
+}
+
+.graph-button:disabled
+{
+    opacity: 0.4;
+
+    cursor: default;
+}
+
+.graph-button:disabled:hover
+{
+    background: rgba(40, 40, 40, 0.95);
 }

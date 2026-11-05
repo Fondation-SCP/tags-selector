@@ -23,19 +23,6 @@ export function showDirectSubNodes(node)
     node.outgoers("node").show();
 }
 
-export function collapseGraph()
-{
-    app.cy.batch(() =>
-    {
-        app.cy.elements().hide();
-        app.cy.nodes().filter(node => node.incomers("edge").length == 0).show();
-    });
-
-    updateLayout();
-
-    app.cy.center(app.cy.nodes(":visible"));
-}
-
 // Met à jour l'affichage global selon le graphe mis à jour
 export function updateLayout()
 {

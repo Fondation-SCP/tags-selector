@@ -84,6 +84,24 @@ export async function getLinks()
     return await stream.toArray();
 }
 
+export async function getComments()
+{
+    const   query = `
+        PREFIX owl: <http://www.w3.org/2002/07/owl#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?element ?comment
+        WHERE {
+            ?element a owl:Class ;
+                rdfs:comment ?comment .
+        }
+        `;
+
+    const   stream = await get(query);
+
+    return await stream.toArray();
+}
+
 export async function getDisjoints()
 {
     const   query = `

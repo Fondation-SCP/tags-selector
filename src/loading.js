@@ -32,16 +32,21 @@ export function hideLoading()
     document.getElementById("loading-overlay").classList.add("hidden");
 }
 
-// Remplace l'écran de chargement par un message d'erreur
-export function failLoading(error)
+export function showLoadError(error)
 {
     console.error(error);
-
-    document.getElementById("loading-spinner").classList.add("hidden");
-    document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
 
     if (error instanceof LoadError)
         showPopup(error.title, error.popup);
     else
         showPopup("Erreur inattendue", ["Le chargement a été interrompu par une erreur imprévue :\n\n", { italic: String(error) }]);
+}
+
+// Remplace l'écran de chargement par un message d'erreur
+export function failLoading(error)
+{
+    document.getElementById("loading-spinner").classList.add("hidden");
+    document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
+
+    showLoadError(error);
 }

@@ -3,11 +3,15 @@ import { getAll } from "./database/get.js";
 import { getUnreachableTags } from "./graph/branches/init.js";
 import { initViewsKeys, initGraphButtons, loadView } from "./views/tools.js";
 import { initTagsBox } from "./selection/tools.js";
+import { initHistory } from "./selection/history.js";
 import { initSearch } from "./search/tools.js";
+import { initLocalRdf, showOntologySource } from "./database/local.js";
 import { initPopup, showPopup } from "./popup.js";
+import { initRefresh } from "./refresh.js";
 import { LoadError, checkLibrary, failLoading } from "./loading.js";
 
 const   UNREACHABLE_SHOWN = 10;
+const   RDF_URL = "https://Fondation-SCP.github.io/tags-selector/resources/ontology/structure-tags.rdf";
 
 // Données globales de l'application
 export const app =
@@ -28,6 +32,9 @@ export const app =
     collapse: null,
     expand: null,
     reveal: null,
+    select: null,
+    deselect: null,
+    clear: null,
     explainConflict: null,
 
     // Affichage courant
@@ -37,7 +44,7 @@ export const app =
     selectedTags: []
 }
 
-async function checkOntology()
+export async function checkOntology()
 {
     let     tags;
 
@@ -54,7 +61,7 @@ async function checkOntology()
         throw new LoadError("Ontologie vide", ["Aucun tag n'a été trouvé : l'ontologie ne déclare aucune classe ", { italic: "owl:Class" }, "."]);
 }
 
-function warnUnreachable()
+export function warnUnreachable()
 {
     const   tags = getUnreachableTags();
 
@@ -83,7 +90,11 @@ async function main()
     checkLibrary("Cytoscape.js", typeof cytoscape != "undefined");
 
     // URL du fichier .rdf de l'ontologie
-    app.rdfUrl = "https://Fondation-SCP.github.io/tags-selector/resources/ontology/structure-tags.rdf";
+    app.rdfUrl = new URLSearchParams(location.search).get("rdf") ?? RDF_URL;
+
+    if (app.rdfUrl != RDF_URL)
+        showOntologySource(`Ontologie : ${app.rdfUrl}`);
+
     // Téléchargement du .rdf
     await loadRdf();
 
@@ -97,6 +108,12 @@ async function main()
     initGraphButtons();
 
     initSearch();
+
+    initHistory();
+
+    initRefresh();
+
+    initLocalRdf();
 
     // Chargement de l'affichage par défaut
     await loadView(0);

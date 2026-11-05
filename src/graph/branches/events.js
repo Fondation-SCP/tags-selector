@@ -1,10 +1,12 @@
 import { app } from "../../main.js";
 import { updateTagsBox } from "../../selection/tools.js";
+import { recordSelection } from "../../selection/history.js";
 import { showPopup } from "../../popup.js";
 import { getTagName } from "../../database/tools.js";
 import { buildTagNode, getTagPath, getTrunkColor, MISC_TAG } from "./init.js";
 import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
 import { addAncestors, findConflict, getConflict } from "./disjoint.js";
+import { showTagInfo, hideTagInfo } from "./info.js";
 
 const   ANIMATION_DURATION = 300;
 const   UNFURL_SPREAD = 250;
@@ -24,6 +26,15 @@ function getSelectedUrls()
     return new Set(app.cy.nodes(".tag.selected").map(node => node.data("url")));
 }
 
+function getClosure(urls)
+{
+    const   closure = new Set(urls);
+
+    urls.forEach(url => addAncestors(url, closure));
+
+    return closure;
+}
+
 function updateSelection()
 {
     const   urls = getSelectedUrls();
@@ -41,9 +52,11 @@ function updateSelection()
         node.toggleClass("excluded", findConflict(url, closure) != null);
     });
 
-    app.selectedTags = new Set([...closure].map(getTagName));
+    app.selectedTags = new Set([...closure].map(getTagName).sort((first, second) => first.localeCompare(second)));
 
     updateTagsBox();
+
+    recordSelection([...urls]);
 }
 
 function explainConflict(url)
@@ -323,16 +336,12 @@ function findChild(node, url)
     return null;
 }
 
-function revealTag(url)
+function openTag(url, delays)
 {
     const   path = getTagPath(url);
 
     if (path == null)
-        return;
-
-    app.cy.nodes(".leaving").remove();
-
-    const   delays = new Map();
+        return null;
 
     let     node = app.cy.getElementById(path[0]);
 
@@ -343,8 +352,73 @@ function revealTag(url)
         node = findChild(node, step);
 
         if (node == null)
-            return;
+            return null;
     }
+
+    return node;
+}
+
+function changeSelection(urls)
+{
+    app.cy.elements().stop(true);
+    app.cy.nodes(".leaving").remove();
+
+    const   target = new Set(urls);
+
+    app.cy.nodes(".tag.selected").forEach((node) =>
+    {
+        if (node.removed() || target.has(node.data("url")))
+            return;
+
+        node.removeClass("selected");
+
+        app.cy.collection(detach(node, [])).remove();
+    });
+
+    const   delays = new Map();
+
+    for (const url of target)
+    {
+        const   selected = getSelectedUrls();
+
+        if (selected.has(url) || findConflict(url, getClosure(selected)) != null)
+            continue;
+
+        const   node = openTag(url, delays);
+
+        if (node == null)
+            continue;
+
+        node.addClass("selected");
+
+        expand(node).forEach((delay, id) => delays.set(id, delay));
+    }
+
+    updateSelection();
+    updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+}
+
+function deselectTag(url)
+{
+    changeSelection([...getSelectedUrls()].filter(selected => !getClosure([selected]).has(url)));
+}
+
+function clearSelection()
+{
+    app.cy.nodes(".tag.selected").removeClass("selected");
+
+    updateSelection();
+}
+
+function revealTag(url)
+{
+    app.cy.nodes(".leaving").remove();
+
+    const   delays = new Map();
+    const   node = openTag(url, delays);
+
+    if (node == null)
+        return;
 
     updateSelection();
 
@@ -435,6 +509,9 @@ export function registerBranchesEvents()
     app.collapse = collapseAll;
     app.expand = expandAll;
     app.reveal = revealTag;
+    app.select = changeSelection;
+    app.deselect = deselectTag;
+    app.clear = clearSelection;
     app.explainConflict = explainConflict;
 
     app.cy.on("viewport", () =>
@@ -450,16 +527,22 @@ export function registerBranchesEvents()
     app.cy.on("mouseover", "node.tag", (event) =>
     {
         const   container = app.cy.container();
-        const   text = event.target.hasClass("excluded") ? explainConflict(event.target.data("url")) : null;
+        const   url = event.target.data("url");
+        const   text = event.target.hasClass("excluded") ? explainConflict(url) : null;
 
         container.style.cursor = text == null ? "pointer" : "not-allowed";
         container.title = text ?? "";
+
+        if (url != MISC_TAG)
+            showTagInfo(url);
     });
 
     app.cy.on("mouseout", "node.tag", () =>
     {
         app.cy.container().style.cursor = "default";
         app.cy.container().title = "";
+
+        hideTagInfo();
     });
 
     app.cy.on("tap", "node.tag", (event) =>

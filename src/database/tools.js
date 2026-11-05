@@ -9,20 +9,6 @@ export function getTagName(url)
     return url.split("#").pop();
 }
 
-// Affiche une liste de tags passée en paramètre
-export function printList(tags)
-{
-    for (const element of tags)
-    {
-        const   url = element.get("element").value;
-        const   name = getTagName(url);
-
-        console.log("> '" + name + "'");
-    }
-
-    console.log("Total: " + tags.length);
-}
-
 async function downloadRdf()
 {
     try
@@ -40,7 +26,7 @@ async function downloadRdf()
     }
 }
 
-function checkResponse(response, text)
+function checkResponse(response)
 {
     if (response.status == 404)
         throw new LoadError("Ontologie introuvable", ["Le fichier de l'ontologie n'existe pas à l'adresse indiquée (erreur ", { italic: "404" }, ")."]);
@@ -50,9 +36,12 @@ function checkResponse(response, text)
 
     if (response.headers.get("Content-Type")?.includes("text/html"))
         throw new LoadError("Format inattendu", ["Le serveur a renvoyé une page web au lieu du fichier de l'ontologie."]);
+}
 
+function checkText(text)
+{
     if (text.trim() == "")
-        throw new LoadError("Ontologie vide", ["Le fichier de l'ontologie téléchargé est vide."]);
+        throw new LoadError("Ontologie vide", ["Le fichier de l'ontologie est vide."]);
 
     if (text.includes("\uFFFD"))
         throw new LoadError("Encodage invalide", ["Le fichier de l'ontologie n'est pas encodé en ", { italic: "UTF-8" }, " : le nom de certains tags serait illisible."]);
@@ -79,7 +68,13 @@ function checkXml(text)
     const   root = xml.documentElement;
 
     if (root.namespaceURI != RDF_NAMESPACE || root.localName != "RDF")
-        throw new LoadError("Format inattendu", ["Le fichier téléchargé n'est pas une ontologie ", { italic: "RDF/XML" }, " : sa racine est ", { italic: `<${root.tagName}>` }, " au lieu de ", { italic: "<rdf:RDF>" }, "."]);
+        throw new LoadError("Format inattendu", ["Le fichier n'est pas une ontologie ", { italic: "RDF/XML" }, " : sa racine est ", { italic: `<${root.tagName}>` }, " au lieu de ", { italic: "<rdf:RDF>" }, "."]);
+}
+
+export function checkRdf(text)
+{
+    checkText(text);
+    checkXml(text);
 }
 
 // Téléchargement du .rdf
@@ -88,8 +83,8 @@ export async function loadRdf()
 {
     const   { response, text } = await downloadRdf();
 
-    checkResponse(response, text);
-    checkXml(text);
+    checkResponse(response);
+    checkRdf(text);
 
     app.rdf = text;
 }
