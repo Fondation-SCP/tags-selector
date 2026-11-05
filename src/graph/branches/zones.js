@@ -1,13 +1,17 @@
 import { app } from "../../main.js";
 import { getChildNodes, getJointId } from "./layout.js";
+import { getThemeColor } from "./init.js";
+import { isDarkTheme } from "../../theme.js";
 
 const   ZONE_PADDING = 24;
 const   ZONE_OPACITY = 0.33;
+const   ZONE_DARK_OPACITY = 0.28;
 
 const   TRUNK_PADDING = 11;
 
 const   ZONE_BORDER = 3;
 const   ZONE_BORDER_SHADE = 0.35;
+const   ZONE_DARK_BORDER_SHADE = 0.5;
 
 let     canvas = null;
 let     context = null;
@@ -57,13 +61,13 @@ function visitZone(node, list)
     if (node.hasClass("tag") && node.data("childIds") != null)
     {
         const   parts = [];
-        const   color = node.data("zoneColor");
+        const   color = getThemeColor(node.data("zoneColor"));
 
         collectParts(node, parts);
 
         list.push({
             color: color,
-            borderColor: shadeColor(color, -ZONE_BORDER_SHADE),
+            borderColor: shadeColor(color, isDarkTheme() ? ZONE_DARK_BORDER_SHADE : -ZONE_BORDER_SHADE),
             order: node.data("zoneOrder"),
             parts: parts
         });
@@ -185,7 +189,7 @@ function drawZones()
     for (const zone of zones)
         drawZone(bufferContext, zone);
 
-    context.globalAlpha = ZONE_OPACITY;
+    context.globalAlpha = isDarkTheme() ? ZONE_DARK_OPACITY : ZONE_OPACITY;
     context.drawImage(buffer, 0, 0);
     context.globalAlpha = 1;
 }

@@ -1,3 +1,51 @@
+:root
+{
+    --page-background: white;
+    --page-text: black;
+    --loading-text: #333;
+
+    --panel-background: rgba(40, 40, 40, 0.95);
+    --panel-hover: rgba(70, 70, 70, 0.95);
+    --panel-border: #666;
+    --panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    --popup-overlay: rgba(0, 0, 0, 0.25);
+    --popup-background: white;
+    --popup-text: #333;
+    --popup-hover: #eee;
+
+    --source-background: #fff3cd;
+    --source-text: #664d03;
+    --source-border: #e0c36c;
+
+    --logo-filter: none;
+}
+
+:root[data-theme="dark"]
+{
+    color-scheme: dark;
+
+    --page-background: #181818;
+    --page-text: #e6e6e6;
+    --loading-text: #c8c8c8;
+
+    --panel-background: rgba(42, 42, 42, 0.95);
+    --panel-hover: rgba(68, 68, 68, 0.95);
+    --panel-border: #595959;
+    --panel-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+
+    --popup-overlay: rgba(0, 0, 0, 0.5);
+    --popup-background: #2a2a2a;
+    --popup-text: #e6e6e6;
+    --popup-hover: #3d3d3d;
+
+    --source-background: #3d3214;
+    --source-text: #ffe08a;
+    --source-border: #8a6d1f;
+
+    --logo-filter: invert(0.9);
+}
+
 html, body
 {
     margin: 0;
@@ -5,6 +53,12 @@ html, body
     height: 100%;
 
     overflow: hidden;
+}
+
+body
+{
+    background: var(--page-background);
+    color: var(--page-text);
 }
 
 #header
@@ -54,10 +108,10 @@ html, body
 {
     padding: 4px 8px;
 
-    background: #fff3cd;
-    color: #664d03;
+    background: var(--source-background);
+    color: var(--source-text);
 
-    border: 1px solid #e0c36c;
+    border: 1px solid var(--source-border);
     border-radius: 6px;
 
     font-family: sans-serif;
@@ -73,6 +127,8 @@ html, body
 {
     width: 34px;
     height: 34px;
+
+    filter: var(--logo-filter);
 }
 
 #search
@@ -91,13 +147,13 @@ html, body
 
     padding: 8px 12px;
 
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 14px;
@@ -131,13 +187,13 @@ html, body
 
     list-style: none;
 
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 14px;
@@ -170,7 +226,7 @@ html, body
     position: fixed;
     inset: 0;
 
-    background: white;
+    background: var(--page-background);
 }
 
 #loading-overlay
@@ -184,7 +240,7 @@ html, body
     align-items: center;
     justify-content: center;
 
-    background: white;
+    background: var(--page-background);
 }
 
 #loading-overlay.hidden
@@ -202,13 +258,15 @@ html, body
 
     font-family: sans-serif;
     font-size: 14px;
-    color: #333;
+    color: var(--loading-text);
 }
 
 #loading-spinner
 {
     width: 40px;
     height: 40px;
+
+    filter: var(--logo-filter);
 
     animation: loading-spin 2s linear infinite;
 }
@@ -240,13 +298,13 @@ html, body
 
     padding: 12px;
 
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 14px;
@@ -337,7 +395,7 @@ html, body
     align-items: center;
     justify-content: center;
 
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--popup-overlay);
 }
 
 #popup-overlay.hidden
@@ -358,13 +416,13 @@ html, body
     margin: 0 16px;
     padding: 16px 20px;
 
-    background: white;
-    color: #333;
+    background: var(--popup-background);
+    color: var(--popup-text);
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 14px;
@@ -412,10 +470,10 @@ html, body
 {
     padding: 6px 24px;
 
-    background: white;
-    color: #333;
+    background: var(--popup-background);
+    color: var(--popup-text);
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 6px;
 
     font-family: sans-serif;
@@ -426,7 +484,7 @@ html, body
 
 #popup-ok:hover, #popup-cancel:hover
 {
-    background: #eee;
+    background: var(--popup-hover);
 }
 
 #popup-cancel.hidden
@@ -452,7 +510,7 @@ html, body
     background: transparent;
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
 
     font-family: sans-serif;
     font-size: 13px;
@@ -479,13 +537,13 @@ html, body
 
     padding: 12px;
 
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 13px;
@@ -546,13 +604,13 @@ html, body
 {
     padding: 8px 12px;
 
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
     color: white;
 
-    border: 1px solid #666;
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--panel-shadow);
 
     font-family: sans-serif;
     font-size: 13px;
@@ -562,7 +620,7 @@ html, body
 
 .graph-button:hover
 {
-    background: rgba(70, 70, 70, 0.95);
+    background: var(--panel-hover);
 }
 
 .graph-button:disabled
@@ -574,5 +632,13 @@ html, body
 
 .graph-button:disabled:hover
 {
-    background: rgba(40, 40, 40, 0.95);
+    background: var(--panel-background);
+}
+
+#theme-toggle
+{
+    width: 38px;
+
+    padding-left: 0;
+    padding-right: 0;
 }

@@ -8,6 +8,7 @@ import { initSearch } from "./search/tools.js";
 import { initLocalRdf, showOntologySource } from "./database/local.js";
 import { initPopup, showPopup } from "./popup.js";
 import { initRefresh } from "./refresh.js";
+import { initTheme } from "./theme.js";
 import { LoadError, checkLibrary, failLoading } from "./loading.js";
 
 const   UNREACHABLE_SHOWN = 10;
@@ -74,6 +75,8 @@ export function warnUnreachable()
 async function main()
 {
     initPopup();
+
+    initTheme();
 
     checkLibrary("Comunica", typeof Comunica != "undefined");
     checkLibrary("Cytoscape.js", typeof cytoscape != "undefined");

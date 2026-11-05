@@ -6,6 +6,8 @@
 
         <link rel="icon" type="image/gif" href="https://fondationscp.wikidot.com/local--favicon/favicon.gif">
         <link rel="stylesheet" href="style.css">
+
+        <script>try { if (localStorage.getItem("tags-selector-theme") == "dark") document.documentElement.dataset.theme = "dark"; } catch { }</script>
     </head>
     <body>
         <div id="header">
@@ -68,6 +70,7 @@
             <button id="rdf-open" class="graph-button" title="Remplacer l'ontologie par un fichier local, sans le publier">Charger un .rdf</button>
             <button id="graph-expand" class="graph-button">Tout déployer</button>
             <button id="graph-collapse" class="graph-button">Tout replier</button>
+            <button id="theme-toggle" class="graph-button" title="Passer en mode sombre">☾</button>
         </div>
 
         <input id="rdf-input" type="file" accept=".rdf,.owl,.xml" hidden>

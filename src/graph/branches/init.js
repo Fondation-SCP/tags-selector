@@ -2,8 +2,9 @@ import { app } from "../../main.js";
 import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../../database/get.js";
 import { getTagName } from "../../database/tools.js";
 import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
-import { initZonesLayer } from "./zones.js";
+import { initZonesLayer, invalidateZones } from "./zones.js";
 import { LoadError } from "../../loading.js";
+import { isDarkTheme } from "../../theme.js";
 
 export const   MISC_TAG = "divers";
 
@@ -62,10 +63,10 @@ function buildLabel(name)
 
 const   TRUNK_TONES =
 [
-    { saturation: 45, lightness: 46 },
-    { saturation: 30, lightness: 58 },
-    { saturation: 55, lightness: 37 },
-    { saturation: 36, lightness: 52 }
+    { saturation: 45, lightness: 46, darkLightness: 64 },
+    { saturation: 30, lightness: 58, darkLightness: 74 },
+    { saturation: 55, lightness: 37, darkLightness: 58 },
+    { saturation: 36, lightness: 52, darkLightness: 69 }
 ];
 
 const   TRUNK_COUNT = 24;
@@ -98,6 +99,7 @@ function buildTrunkPalette()
 {
     const   colors = [];
     const   hues = new Map();
+    const   darks = new Map();
 
     for (let index = 0; index < TRUNK_COUNT; index++)
     {
@@ -107,12 +109,21 @@ function buildTrunkPalette()
 
         colors.push(color);
         hues.set(color, hue);
+        darks.set(color, toHexColor(hue, tone.saturation, tone.darkLightness));
     }
 
-    return { colors: colors, hues: hues };
+    return { colors: colors, hues: hues, darks: darks };
 }
 
 const   TRUNK_PALETTE = buildTrunkPalette();
+
+export function getThemeColor(color)
+{
+    if (!isDarkTheme())
+        return color;
+
+    return TRUNK_PALETTE.darks.get(color) ?? color;
+}
 
 function hashId(id)
 {
@@ -164,126 +175,152 @@ export function getTrunkColor(ownerId, avoided)
     return best;
 }
 
-const   branchesStyle =
-[
+const   TAG_COLORS =
+{
+    light:
     {
-        selector: "node.tag",
-        style:
-        {
-            shape: "round-rectangle",
-
-            label: "data(wrapped)",
-            "font-family": LABEL_FONT_FAMILY,
-            "font-size": LABEL_FONT_SIZE,
-
-            "overlay-opacity": 0,
-
-            "text-wrap": "wrap",
-            "text-valign": "center",
-            "text-halign": "center",
-
-            "background-color": "white",
-            color: "black",
-
-            "border-width": 2,
-            "border-color": "#555",
-
-            width: "data(width)",
-            height: "data(height)",
-            padding: 6,
-
-            "text-max-width": `${LABEL_MAX_WIDTH}px`
-        }
+        background: "white",
+        text: "black",
+        border: "#555",
+        expandableBorder: "#333",
+        implied: "#9fd49f",
+        excludedBorder: "black"
     },
+    dark:
     {
-        selector: "node.expandable",
-        style:
-        {
-            "border-width": 4,
-            "border-color": "#333"
-        }
-    },
-    {
-        selector: "node.selected",
-        style:
-        {
-            "background-color": "green",
-            color: "white"
-        }
-    },
-    {
-        selector: "node.implied",
-        style:
-        {
-            "background-color": "#9fd49f"
-        }
-    },
-    {
-        selector: "node.excluded",
-        style:
-        {
-            opacity: 0.75,
-            "background-color": "#e53935",
-            "border-color": "black",
-            color: "white"
-        }
-    },
-    {
-        selector: "node.highlighted",
-        style:
-        {
-            "underlay-color": "#ffc400",
-            "underlay-opacity": 0.8,
-            "underlay-padding": 8,
-            "underlay-shape": "round-rectangle"
-        }
-    },
-    {
-        selector: "node.conflict",
-        style:
-        {
-            "underlay-color": "#e53935",
-            "underlay-opacity": 0.8,
-            "underlay-padding": 8,
-            "underlay-shape": "round-rectangle"
-        }
-    },
-    {
-        selector: "node.joint, node.fork",
-        style:
-        {
-            label: "",
-
-            width: 1,
-            height: 1,
-
-            "background-opacity": 0,
-            "border-width": 0,
-
-            events: "no"
-        }
-    },
-    {
-        selector: "edge.trunk",
-        style:
-        {
-            width: "data(width)",
-            "line-color": "data(color)"
-        }
-    },
-    {
-        selector: "edge.branch",
-        style:
-        {
-            width: "data(width)",
-            "line-color": "data(color)"
-        }
-    },
-    {
-        selector: "core",
-        style: { "active-bg-opacity": 0 }
+        background: "#262626",
+        text: "#ececec",
+        border: "#8a8a8a",
+        expandableBorder: "#c8c8c8",
+        implied: "#2f5d34",
+        excludedBorder: "#ddd"
     }
-];
+};
+
+function getBranchesStyle()
+{
+    const   colors = isDarkTheme() ? TAG_COLORS.dark : TAG_COLORS.light;
+
+    return [
+        {
+            selector: "node.tag",
+            style:
+            {
+                shape: "round-rectangle",
+
+                label: "data(wrapped)",
+                "font-family": LABEL_FONT_FAMILY,
+                "font-size": LABEL_FONT_SIZE,
+
+                "overlay-opacity": 0,
+
+                "text-wrap": "wrap",
+                "text-valign": "center",
+                "text-halign": "center",
+
+                "background-color": colors.background,
+                color: colors.text,
+
+                "border-width": 2,
+                "border-color": colors.border,
+
+                width: "data(width)",
+                height: "data(height)",
+                padding: 6,
+
+                "text-max-width": `${LABEL_MAX_WIDTH}px`
+            }
+        },
+        {
+            selector: "node.expandable",
+            style:
+            {
+                "border-width": 4,
+                "border-color": colors.expandableBorder
+            }
+        },
+        {
+            selector: "node.selected",
+            style:
+            {
+                "background-color": "green",
+                color: "white"
+            }
+        },
+        {
+            selector: "node.implied",
+            style:
+            {
+                "background-color": colors.implied
+            }
+        },
+        {
+            selector: "node.excluded",
+            style:
+            {
+                opacity: 0.75,
+                "background-color": "#e53935",
+                "border-color": colors.excludedBorder,
+                color: "white"
+            }
+        },
+        {
+            selector: "node.highlighted",
+            style:
+            {
+                "underlay-color": "#ffc400",
+                "underlay-opacity": 0.8,
+                "underlay-padding": 8,
+                "underlay-shape": "round-rectangle"
+            }
+        },
+        {
+            selector: "node.conflict",
+            style:
+            {
+                "underlay-color": "#e53935",
+                "underlay-opacity": 0.8,
+                "underlay-padding": 8,
+                "underlay-shape": "round-rectangle"
+            }
+        },
+        {
+            selector: "node.joint, node.fork",
+            style:
+            {
+                label: "",
+
+                width: 1,
+                height: 1,
+
+                "background-opacity": 0,
+                "border-width": 0,
+
+                events: "no"
+            }
+        },
+        {
+            selector: "edge.trunk",
+            style:
+            {
+                width: "data(width)",
+                "line-color": (edge) => getThemeColor(edge.data("color"))
+            }
+        },
+        {
+            selector: "edge.branch",
+            style:
+            {
+                width: "data(width)",
+                "line-color": (edge) => getThemeColor(edge.data("color"))
+            }
+        },
+        {
+            selector: "core",
+            style: { "active-bg-opacity": 0 }
+        }
+    ];
+}
 
 function initBranchesBase()
 {
@@ -296,10 +333,20 @@ function initBranchesBase()
 
         elements: [],
 
-        style: branchesStyle
+        style: getBranchesStyle()
     });
 
     initZonesLayer();
+}
+
+export function updateBranchesStyle()
+{
+    if (app.cy == null)
+        return;
+
+    invalidateZones();
+
+    app.cy.style(getBranchesStyle());
 }
 
 async function initBranchesData()
