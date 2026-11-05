@@ -1,6 +1,7 @@
 import { app } from "../main.js";
 import { findTag } from "../graph/branches/init.js";
 import { clearSelection, deselectTag, revealTag } from "../graph/branches/events.js";
+import { getParentsText } from "../graph/branches/info.js";
 import { showPopup } from "../popup.js";
 
 const   COPY_FEEDBACK = 1500;
@@ -12,6 +13,7 @@ function buildChip(name)
     const   chip = document.createElement("span");
     const   label = document.createElement("span");
     const   url = findTag(name);
+    const   tooltip = getParentsText(url);
 
     chip.className = "selected-tag";
 
@@ -20,6 +22,9 @@ function buildChip(name)
     label.textContent = name;
     label.classList.add("clickable");
     label.addEventListener("click", () => revealTag(url));
+
+    if (tooltip != null)
+        label.title = tooltip;
 
     remove.className = "selected-tag-remove";
     remove.textContent = "×";
