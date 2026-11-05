@@ -1,5 +1,11 @@
 # tags-selector
 
+Outil de navigation et de sélection dans l'ontologie des tags de la [Fondation SCP](https://fondationscp.wikidot.com/), conçu pour accompagner la mise en place de son nouveau système d'étiquettes.
+
+L'ontologie est interrogée en `SPARQL` et affichée sous forme de graphe interactif : on y parcourt la hiérarchie des tags, on les recherche et on les sélectionne. Les tags parents sont ajoutés automatiquement à la sélection, et les tags incompatibles (disjoints) sont bloqués.
+
+L'application tourne entièrement dans le navigateur, sans étape de compilation (`Comunica`, `Cytoscape.js`, `Dagre`).
+
 ## Hiérarchie
 
 – `src/database/` : interaction avec la base de données (en `SPARQL`)  
