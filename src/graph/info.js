@@ -52,7 +52,12 @@ export function getParentsText(url)
     return texts.get(url);
 }
 
-export function showTagInfo(url)
+const   TAG_INFO_DELAY = 200;
+
+let     pendingUrl = null;
+let     pendingTimer = null;
+
+function fillTagInfo(url)
 {
     const   parents = getParentsText(url);
     const   comments = app.hierarchy.comments.get(url) ?? [];
@@ -67,11 +72,36 @@ export function showTagInfo(url)
 
     commentText.textContent = comments.length == 0 ? "Aucune définition dans l'ontologie." : comments.join("\n\n");
     commentText.classList.toggle("empty", comments.length == 0);
+}
 
-    document.getElementById("tag-info").classList.remove("hidden");
+export function showTagInfo(url)
+{
+    const   box = document.getElementById("tag-info");
+
+    if (!box.classList.contains("hidden"))
+    {
+        fillTagInfo(url);
+        return;
+    }
+
+    pendingUrl = url;
+
+    if (pendingTimer != null)
+        return;
+
+    pendingTimer = setTimeout(() =>
+    {
+        pendingTimer = null;
+
+        fillTagInfo(pendingUrl);
+        box.classList.remove("hidden");
+    }, TAG_INFO_DELAY);
 }
 
 export function hideTagInfo()
 {
+    clearTimeout(pendingTimer);
+    pendingTimer = null;
+
     document.getElementById("tag-info").classList.add("hidden");
 }
