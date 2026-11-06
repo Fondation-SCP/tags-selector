@@ -17,6 +17,8 @@ const   HIGHLIGHT_STEP = 250;
 let     zoneOrder = 0;
 const   blinkTimers = new Map();
 
+let     hovered = null;
+
 const   ZOOM_STEP = 1.15;
 const   WHEEL_LINE = 40;
 const   WHEEL_LIMIT = 120;
@@ -48,6 +50,34 @@ function updateSelection()
     updateTagsBox();
 
     recordSelection([...urls]);
+
+    if (hovered != null)
+        updateHover();
+}
+
+function updateHover()
+{
+    const   container = app.cy.container();
+
+    if (hovered == null || hovered.removed())
+    {
+        hovered = null;
+
+        container.style.cursor = "default";
+        container.title = "";
+
+        hideTagInfo();
+        return;
+    }
+
+    const   url = hovered.data("url");
+    const   text = hovered.hasClass("excluded") ? explainConflict(url) : null;
+
+    container.style.cursor = text == null ? "pointer" : "not-allowed";
+    container.title = text ?? "";
+
+    if (url != MISC_TAG)
+        showTagInfo(url);
 }
 
 export function explainConflict(url)
@@ -222,7 +252,11 @@ function retract(elements, position)
         { duration: ANIMATION_DURATION, easing: "ease-in" }
     );
 
-    setTimeout(() => elements.remove(), ANIMATION_DURATION);
+    setTimeout(() =>
+    {
+        if (elements.cy() == app.cy)
+            elements.filter(element => !element.removed()).remove();
+    }, ANIMATION_DURATION);
 }
 
 function startChange(node)
@@ -314,8 +348,24 @@ function findChild(node, url)
     return null;
 }
 
+function findTagNode(url)
+{
+    const   nodes = app.cy.nodes(".tag").filter(node => node.data("url") == url && !node.hasClass("leaving"));
+    const   selected = nodes.filter(".selected");
+
+    if (selected.length > 0)
+        return selected[0];
+
+    return nodes.length > 0 ? nodes[0] : null;
+}
+
 function openTag(url, delays)
 {
+    const   shown = findTagNode(url);
+
+    if (shown != null)
+        return shown;
+
     const   path = getTagPath(url);
 
     if (path == null)
@@ -484,25 +534,26 @@ export function registerGraphEvents()
 
     app.cy.on("viewport", clampPan);
 
+    hovered = null;
+
     app.cy.on("mouseover", "node.tag", (event) =>
     {
-        const   container = app.cy.container();
-        const   url = event.target.data("url");
-        const   text = event.target.hasClass("excluded") ? explainConflict(url) : null;
+        hovered = event.target;
 
-        container.style.cursor = text == null ? "pointer" : "not-allowed";
-        container.title = text ?? "";
-
-        if (url != MISC_TAG)
-            showTagInfo(url);
+        updateHover();
     });
 
     app.cy.on("mouseout", "node.tag", () =>
     {
-        app.cy.container().style.cursor = "default";
-        app.cy.container().title = "";
+        hovered = null;
 
-        hideTagInfo();
+        updateHover();
+    });
+
+    app.cy.on("remove", "node.tag", () =>
+    {
+        if (hovered != null && hovered.removed())
+            updateHover();
     });
 
     app.cy.on("tap", "node.tag", (event) =>

@@ -52,21 +52,20 @@ function closePopup(confirmed)
 
     document.getElementById("popup-overlay").classList.add("hidden");
 
-    if (confirmed && entry != null && entry.confirm != null)
-        entry.confirm.action();
-
     const   next = queue.shift();
 
     if (next != null)
-    {
         displayPopup(next);
-        return;
+    else
+    {
+        updateInert();
+
+        returnFocus?.focus();
+        returnFocus = null;
     }
 
-    updateInert();
-
-    returnFocus?.focus();
-    returnFocus = null;
+    if (confirmed && entry != null && entry.confirm != null)
+        entry.confirm.action();
 }
 
 function queuePopup(entry)

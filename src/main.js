@@ -12,6 +12,8 @@ import { checkLibrary, failLoading, hideLoading } from "./loading.js";
 
 const   RDF_URL = "https://Fondation-SCP.github.io/tags-selector/resources/ontology/structure-tags.rdf";
 
+window.removeEventListener("error", onScriptError);
+
 // Point de départ du programme
 async function main()
 {

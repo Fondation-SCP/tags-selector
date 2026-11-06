@@ -14,3 +14,10 @@ function failScripts()
     overlay.classList.remove("hidden");
     button.focus();
 }
+
+function onScriptError()
+{
+    failScripts();
+}
+
+window.addEventListener("error", onScriptError);

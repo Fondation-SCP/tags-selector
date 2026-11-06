@@ -52,8 +52,10 @@ async function loadLocalRdf(file)
             showLoadError(error);
         }
     }
-
-    loading = false;
+    finally
+    {
+        loading = false;
+    }
 }
 
 export function initLocalRdf()
