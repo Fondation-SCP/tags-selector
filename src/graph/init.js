@@ -1,18 +1,18 @@
 import { app } from "../state.js";
-import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../database/get.js";
-import { compareTags, getTagName } from "../database/tools.js";
+import { getTagName } from "../database/tools.js";
 import { fitGraph, initRadius } from "./layout.js";
 import { initZonesLayer, invalidateZones } from "./zones.js";
-import { LoadError } from "../loading.js";
+import { getThemeColor } from "./palette.js";
+import { isExpandable } from "./hierarchy.js";
 import { isDarkTheme } from "../theme.js";
-
-export const   MISC_TAG = "divers";
 
 const   LABEL_FONT_SIZE = 10;
 const   LABEL_FONT_FAMILY = "Helvetica Neue, Helvetica, sans-serif";
 const   LABEL_MAX_WIDTH = 80;
 
 let     measureContext = null;
+
+const   labels = new Map();
 
 function measureLabel(text)
 {
@@ -61,118 +61,22 @@ function buildLabel(name)
     };
 }
 
-const   TRUNK_TONES =
-[
-    { saturation: 45, lightness: 46, darkLightness: 64 },
-    { saturation: 30, lightness: 58, darkLightness: 74 },
-    { saturation: 55, lightness: 37, darkLightness: 58 },
-    { saturation: 36, lightness: 52, darkLightness: 69 }
-];
-
-const   TRUNK_COUNT = 24;
-const   TRUNK_HUE_STEP = 137.508;
-const   TRUNK_HUE_GAP = 45;
-
-function toHexColor(hue, saturation, lightness)
+function getLabel(name)
 {
-    const   level = lightness / 100;
-    const   chroma = (1 - Math.abs(2 * level - 1)) * (saturation / 100);
-    const   second = chroma * (1 - Math.abs(((hue / 60) % 2) - 1));
-    const   base = level - chroma / 2;
+    let     label = labels.get(name);
 
-    const   sectors =
-    [
-        [chroma, second, 0],
-        [second, chroma, 0],
-        [0, chroma, second],
-        [0, second, chroma],
-        [second, 0, chroma],
-        [chroma, 0, second]
-    ];
-
-    const   channels = sectors[Math.floor(hue / 60) % 6];
-
-    return `#${channels.map(value => Math.round((value + base) * 255).toString(16).padStart(2, "0")).join("")}`;
-}
-
-function buildTrunkPalette()
-{
-    const   colors = [];
-    const   hues = new Map();
-    const   darks = new Map();
-
-    for (let index = 0; index < TRUNK_COUNT; index++)
+    if (label == null)
     {
-        const   tone = TRUNK_TONES[index % TRUNK_TONES.length];
-        const   hue = (index * TRUNK_HUE_STEP) % 360;
-        const   color = toHexColor(hue, tone.saturation, tone.lightness);
-
-        colors.push(color);
-        hues.set(color, hue);
-        darks.set(color, toHexColor(hue, tone.saturation, tone.darkLightness));
+        label = buildLabel(name);
+        labels.set(name, label);
     }
 
-    return { colors: colors, hues: hues, darks: darks };
+    return label;
 }
 
-const   TRUNK_PALETTE = buildTrunkPalette();
-
-export function getThemeColor(color)
+function getLabelHeight()
 {
-    if (!isDarkTheme())
-        return color;
-
-    return TRUNK_PALETTE.darks.get(color) ?? color;
-}
-
-function hashId(id)
-{
-    let     hash = 0;
-
-    for (let index = 0; index < id.length; index++)
-        hash = (hash * 31 + id.charCodeAt(index)) % 100000007;
-
-    return hash;
-}
-
-export function getTrunkColor(ownerId, avoided)
-{
-    const   colors = TRUNK_PALETTE.colors;
-    const   start = hashId(ownerId) % colors.length;
-
-    const   hues = avoided.filter(color => TRUNK_PALETTE.hues.has(color)).map(color => TRUNK_PALETTE.hues.get(color));
-
-    if (hues.length == 0)
-        return colors[start];
-
-    let     best = colors[start];
-    let     bestGap = -1;
-
-    for (let step = 0; step < colors.length; step++)
-    {
-        const   color = colors[(start + step) % colors.length];
-        const   hue = TRUNK_PALETTE.hues.get(color);
-
-        let     gap = 360;
-
-        for (const other of hues)
-        {
-            const   delta = Math.abs(hue - other);
-
-            gap = Math.min(gap, Math.min(delta, 360 - delta));
-        }
-
-        if (gap >= TRUNK_HUE_GAP)
-            return color;
-
-        if (gap > bestGap)
-        {
-            bestGap = gap;
-            best = color;
-        }
-    }
-
-    return best;
+    return app.hierarchy.tags.reduce((height, url) => Math.max(height, getLabel(getTagName(url)).height), 0);
 }
 
 const   TAG_COLORS =
@@ -211,7 +115,8 @@ const   TAG_COLORS =
 
 function getGraphStyle()
 {
-    const   colors = isDarkTheme() ? TAG_COLORS.dark : TAG_COLORS.light;
+    const   dark = isDarkTheme();
+    const   colors = dark ? TAG_COLORS.dark : TAG_COLORS.light;
 
     return [
         {
@@ -277,23 +182,26 @@ function getGraphStyle()
             }
         },
         {
-            selector: "node.highlighted",
+            selector: "node.highlighted, node.conflict",
             style:
             {
-                "underlay-color": colors.highlight,
                 "underlay-opacity": 0.8,
                 "underlay-padding": 8,
                 "underlay-shape": "round-rectangle"
             }
         },
         {
+            selector: "node.highlighted",
+            style:
+            {
+                "underlay-color": colors.highlight
+            }
+        },
+        {
             selector: "node.conflict",
             style:
             {
-                "underlay-color": colors.conflict,
-                "underlay-opacity": 0.8,
-                "underlay-padding": 8,
-                "underlay-shape": "round-rectangle"
+                "underlay-color": colors.conflict
             }
         },
         {
@@ -312,19 +220,11 @@ function getGraphStyle()
             }
         },
         {
-            selector: "edge.trunk",
+            selector: "edge.trunk, edge.branch",
             style:
             {
                 width: "data(width)",
-                "line-color": (edge) => getThemeColor(edge.data("color"))
-            }
-        },
-        {
-            selector: "edge.branch",
-            style:
-            {
-                width: "data(width)",
-                "line-color": (edge) => getThemeColor(edge.data("color"))
+                "line-color": (edge) => getThemeColor(edge.data("color"), dark)
             }
         },
         {
@@ -361,163 +261,9 @@ export function updateGraphStyle()
     app.cy.style(getGraphStyle());
 }
 
-export async function buildHierarchy(rdf)
-{
-    let     tags;
-
-    try
-    {
-        tags = await getAll(rdf);
-    }
-    catch (error)
-    {
-        throw new LoadError("RDF invalide", ["Le fichier de l'ontologie est un XML valide, mais pas un RDF/XML correct :\n\n", { italic: error.message }], error);
-    }
-
-    if (tags.length == 0)
-        throw new LoadError("Ontologie vide", ["Aucun tag n'a été trouvé : l'ontologie ne déclare aucune classe ", { italic: "owl:Class" }, "."]);
-
-    const   [roots, uniques, links, disjoints, comments] = await Promise.all([getRoots(rdf), getUniques(rdf), getLinks(rdf), getDisjoints(rdf), getComments(rdf)]);
-
-    const   known = new Set(tags.map(element => element.get("element").value));
-    const   children = new Map();
-    const   parents = new Map();
-    const   pairs = new Map();
-    const   notes = new Map();
-    const   urls = new Map([...known].map(url => [getTagName(url), url]));
-
-    for (const element of comments)
-    {
-        const   url = element.get("element").value;
-
-        if (!notes.has(url))
-            notes.set(url, []);
-
-        notes.get(url).push(element.get("comment").value);
-    }
-
-    for (const element of links)
-    {
-        const   parent = element.get("parent").value;
-        const   child = element.get("child").value;
-
-        if (!known.has(parent) || !known.has(child))
-            continue;
-
-        if (!children.has(parent))
-            children.set(parent, []);
-
-        children.get(parent).push(child);
-
-        if (!parents.has(child))
-            parents.set(child, []);
-
-        parents.get(child).push(parent);
-    }
-
-    for (const element of disjoints)
-    {
-        const   first = element.get("first").value;
-        const   second = element.get("second").value;
-
-        if (!known.has(first) || !known.has(second))
-            continue;
-
-        pairs.set([first, second].sort().join(" "), [first, second]);
-    }
-
-    for (const list of children.values())
-        list.sort(compareTags);
-
-    const   isolated = uniques.map(element => element.get("element").value).sort(compareTags);
-    const   list = roots.map(element => element.get("element").value);
-
-    // Les tags sans parent ni sous tag sont regroupés sous un tag racine fictif
-    if (isolated.length > 0)
-    {
-        children.set(MISC_TAG, isolated);
-        list.push(MISC_TAG);
-    }
-
-    if (list.length == 0)
-        throw new LoadError("Hiérarchie invalide", ["Aucun tag racine n'a été trouvé : chaque tag est déclaré sous-tag d'un autre (cycle de ", { italic: "rdfs:subClassOf" }, " ou parent non déclaré comme ", { italic: "owl:Class" }, ")."]);
-
-    return {
-        children: children,
-        parents: parents,
-        roots: list.sort(compareTags),
-        tags: [...known],
-        urls: urls,
-        comments: notes,
-        disjoints: [...pairs.values()]
-    };
-}
-
-export function findTag(name)
-{
-    return app.hierarchy.urls.get(name);
-}
-
-export function getTagPath(url)
-{
-    const   parents = new Map();
-    const   queue = [...app.hierarchy.roots];
-
-    for (const root of queue)
-        parents.set(root, null);
-
-    for (let index = 0; index < queue.length && queue[index] != url; index++)
-    {
-        for (const child of app.hierarchy.children.get(queue[index]) ?? [])
-        {
-            if (parents.has(child))
-                continue;
-
-            parents.set(child, queue[index]);
-            queue.push(child);
-        }
-    }
-
-    if (!parents.has(url))
-        return null;
-
-    const   path = [];
-
-    for (let current = url; current != null; current = parents.get(current))
-        path.unshift(current);
-
-    return path;
-}
-
-export function getUnreachableTags()
-{
-    const   reached = new Set(app.hierarchy.roots);
-    const   queue = [...app.hierarchy.roots];
-
-    for (let index = 0; index < queue.length; index++)
-    {
-        for (const child of app.hierarchy.children.get(queue[index]) ?? [])
-        {
-            if (reached.has(child))
-                continue;
-
-            reached.add(child);
-            queue.push(child);
-        }
-    }
-
-    return app.hierarchy.tags.filter(url => !reached.has(url)).sort(compareTags);
-}
-
-function isExpandable(url)
-{
-    return app.hierarchy.children.has(url);
-}
-
 export function buildTagNode(id, url, depth, position)
 {
-    const   name = getTagName(url);
-    const   label = buildLabel(name);
+    const   label = getLabel(getTagName(url));
 
     return {
         data:
@@ -545,7 +291,7 @@ function initNodes()
 
     app.cy.add(elements);
 
-    initRadius();
+    initRadius(getLabelHeight());
     fitGraph();
 }
 

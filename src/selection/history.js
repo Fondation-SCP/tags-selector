@@ -1,13 +1,16 @@
-import { changeSelection } from "../graph/events.js";
 import { isPopupOpen } from "../popup.js";
 import { isLoading } from "../loading.js";
 
 const   HISTORY_LIMIT = 100;
 
-let     entries = [[]];
+const   EMPTY_ENTRY = { urls: [], key: "" };
+
+let     entries = [EMPTY_ENTRY];
 let     position = 0;
 
-function getKey(urls)
+let     applySelection = null;
+
+export function getSelectionKey(urls)
 {
     return [...urls].sort().join(" ");
 }
@@ -18,13 +21,13 @@ function updateButtons()
     document.getElementById("history-redo").disabled = position == entries.length - 1;
 }
 
-export function recordSelection(urls)
+export function recordSelection(urls, key = getSelectionKey(urls))
 {
-    if (getKey(urls) == getKey(entries[position]))
+    if (key == entries[position].key)
         return;
 
     entries = entries.slice(0, position + 1);
-    entries.push([...urls]);
+    entries.push({ urls: [...urls], key: key });
 
     if (entries.length > HISTORY_LIMIT)
         entries.shift();
@@ -36,7 +39,7 @@ export function recordSelection(urls)
 
 export function resetHistory()
 {
-    entries = [[]];
+    entries = [EMPTY_ENTRY];
     position = 0;
 
     updateButtons();
@@ -53,7 +56,7 @@ function moveHistory(step)
 
     updateButtons();
 
-    changeSelection(entries[position]);
+    applySelection(entries[position].urls);
 }
 
 function isBusy(target)
@@ -64,8 +67,10 @@ function isBusy(target)
     return isPopupOpen() || isLoading();
 }
 
-export function initHistory()
+export function initHistory(apply)
 {
+    applySelection = apply;
+
     document.getElementById("history-undo").addEventListener("click", () => moveHistory(-1));
     document.getElementById("history-redo").addEventListener("click", () => moveHistory(1));
 

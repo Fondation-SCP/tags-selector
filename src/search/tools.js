@@ -1,11 +1,15 @@
 import { app } from "../state.js";
 import { getTagName } from "../database/tools.js";
-import { explainConflict, revealTag } from "../graph/events.js";
+import { revealTag } from "../graph/events.js";
+import { getSelectedUrls } from "../graph/nodes.js";
+import { explainConflict, getClosure } from "../graph/disjoint.js";
 
 const   MAX_RESULTS = 10;
 
 let     results = [];
 let     active = -1;
+
+let     index = null;
 
 function normalize(text)
 {
@@ -15,17 +19,17 @@ function normalize(text)
         .replace(/^[-°~!¬]+|-+$/g, "");
 }
 
-function getDistance(first, second)
+function getPrefixDistance(query, name)
 {
-    let     previous = Array.from({ length: second.length + 1 }, (value, index) => index);
+    let     previous = Array.from({ length: name.length + 1 }, (value, column) => column);
 
-    for (let row = 1; row <= first.length; row++)
+    for (let row = 1; row <= query.length; row++)
     {
         const   current = [row];
 
-        for (let column = 1; column <= second.length; column++)
+        for (let column = 1; column <= name.length; column++)
         {
-            const   cost = first[row - 1] == second[column - 1] ? 0 : 1;
+            const   cost = query[row - 1] == name[column - 1] ? 0 : 1;
 
             current.push(Math.min(previous[column] + 1, current[column - 1] + 1, previous[column - 1] + cost));
         }
@@ -33,7 +37,7 @@ function getDistance(first, second)
         previous = current;
     }
 
-    return previous[second.length];
+    return Math.min(...previous);
 }
 
 function getScore(name, query)
@@ -51,12 +55,33 @@ function getScore(name, query)
         return 3;
 
     const   tolerance = query.length >= 6 ? 2 : (query.length >= 3 ? 1 : 0);
-    const   distance = Math.min(getDistance(query, name), getDistance(query, name.slice(0, query.length)));
+
+    if (tolerance == 0)
+        return null;
+
+    const   distance = getPrefixDistance(query, name);
 
     if (distance > tolerance)
         return null;
 
     return 4 + distance;
+}
+
+function getIndex()
+{
+    if (index == null || index.hierarchy != app.hierarchy)
+    {
+        const   entries = app.hierarchy.tags.map((url) =>
+        {
+            const   name = getTagName(url);
+
+            return { url: url, name: name, normalized: normalize(name) };
+        });
+
+        index = { hierarchy: app.hierarchy, entries: entries };
+    }
+
+    return index.entries;
 }
 
 function findTags(text)
@@ -68,13 +93,12 @@ function findTags(text)
 
     const   found = [];
 
-    for (const url of app.hierarchy.tags)
+    for (const entry of getIndex())
     {
-        const   name = getTagName(url);
-        const   score = getScore(normalize(name), query);
+        const   score = getScore(entry.normalized, query);
 
         if (score != null)
-            found.push({ url: url, name: name, score: score });
+            found.push({ url: entry.url, name: entry.name, score: score });
     }
 
     found.sort((first, second) => first.score - second.score
@@ -109,13 +133,15 @@ function closeResults()
 function renderResults()
 {
     const   list = document.getElementById("search-results");
+    const   urls = app.cy == null ? new Set() : getSelectedUrls();
+    const   closure = getClosure(urls);
 
     list.replaceChildren();
 
     results.forEach((result, index) =>
     {
         const   item = document.createElement("li");
-        const   conflict = explainConflict(result.url);
+        const   conflict = explainConflict(result.url, urls, closure);
 
         item.id = `search-result-${index}`;
         item.setAttribute("role", "option");

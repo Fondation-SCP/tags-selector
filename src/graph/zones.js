@@ -1,6 +1,6 @@
 import { app } from "../state.js";
-import { getChildNodes, getJointId } from "./layout.js";
-import { getThemeColor } from "./init.js";
+import { getChildNodes, getJointId, getRootNodes } from "./nodes.js";
+import { getThemeColor } from "./palette.js";
 import { isDarkTheme } from "../theme.js";
 
 const   ZONE_PADDING = 24;
@@ -13,13 +13,16 @@ const   ZONE_BORDER = 3;
 const   ZONE_BORDER_SHADE = 0.35;
 const   ZONE_DARK_BORDER_SHADE = 0.5;
 
-let     canvas = null;
-let     context = null;
-
-let     buffer = null;
-let     bufferContext = null;
-
-let     zones = null;
+const   layer =
+{
+    canvas: null,
+    context: null,
+    buffer: null,
+    bufferContext: null,
+    zones: null,
+    parts: null,
+    moved: true
+};
 
 function shadeColor(color, amount)
 {
@@ -32,81 +35,75 @@ function shadeColor(color, amount)
     return `rgb(${mix((value >> 16) & 255)}, ${mix((value >> 8) & 255)}, ${mix(value & 255)})`;
 }
 
-function collectParts(node, parts)
+function collectZones(node, zones, parts)
 {
-    const   part = [node];
+    const   owned = [];
+    const   expanded = node.data("childIds") != null;
 
-    getChildNodes(node).forEach((child, index) =>
+    if (expanded)
     {
-        const   joint = app.cy.getElementById(getJointId(node.id(), index));
+        const   part = { nodes: [node], box: null };
 
-        if (joint.length == 0 || child.length == 0)
-            return;
+        getChildNodes(node).forEach((child, index) =>
+        {
+            const   joint = app.cy.getElementById(getJointId(node.id(), index));
 
-        part.push(joint);
-        part.push(child);
-
-        if (child.data("childIds") != null)
-            collectParts(child, parts);
-    });
-
-    parts.push(part);
-}
-
-function visitZone(node, list)
-{
-    if (node.hasClass("tag") && node.data("childIds") != null)
-    {
-        const   parts = [];
-        const   color = getThemeColor(node.data("zoneColor"));
-
-        collectParts(node, parts);
-
-        list.push({
-            color: color,
-            borderColor: shadeColor(color, isDarkTheme() ? ZONE_DARK_BORDER_SHADE : -ZONE_BORDER_SHADE),
-            order: node.data("zoneOrder"),
-            parts: parts
+            if (joint.length > 0 && child.length > 0)
+                part.nodes.push(joint, child);
         });
+
+        owned.push(part);
+        parts.push(part);
     }
 
     for (const child of getChildNodes(node))
         if (child.length > 0)
-            visitZone(child, list);
+            owned.push(...collectZones(child, zones, parts));
+
+    if (expanded && node.hasClass("tag"))
+    {
+        const   color = getThemeColor(node.data("zoneColor"));
+
+        zones.push({
+            color: color,
+            borderColor: shadeColor(color, isDarkTheme() ? ZONE_DARK_BORDER_SHADE : -ZONE_BORDER_SHADE),
+            order: node.data("zoneOrder"),
+            parts: owned
+        });
+    }
+
+    return owned;
 }
 
 function buildZones()
 {
-    const   list = [];
+    const   zones = [];
+    const   parts = [];
 
-    if (app.hierarchy == null)
-        return list;
+    if (app.hierarchy != null)
+        for (const root of getRootNodes())
+            if (root.length > 0)
+                collectZones(root, zones, parts);
 
-    for (const url of app.hierarchy.roots)
-    {
-        const   root = app.cy.getElementById(url);
-
-        if (root.length > 0)
-            visitZone(root, list);
-    }
-
-    return list.sort((first, second) => second.order - first.order);
+    layer.zones = zones.sort((first, second) => second.order - first.order);
+    layer.parts = parts;
+    layer.moved = true;
 }
 
-function getPartBox(part, padding)
+function getPartBox(part)
 {
     let     x1 = Infinity;
     let     y1 = Infinity;
     let     x2 = -Infinity;
     let     y2 = -Infinity;
 
-    for (const node of part)
+    for (const node of part.nodes)
     {
         const   position = node.position();
         const   tag = node.hasClass("tag");
 
-        const   halfWidth = (tag ? node.width() / 2 + ZONE_PADDING : TRUNK_PADDING) + padding;
-        const   halfHeight = (tag ? node.height() / 2 + ZONE_PADDING : TRUNK_PADDING) + padding;
+        const   halfWidth = tag ? node.width() / 2 + ZONE_PADDING : TRUNK_PADDING;
+        const   halfHeight = tag ? node.height() / 2 + ZONE_PADDING : TRUNK_PADDING;
 
         x1 = Math.min(x1, position.x - halfWidth);
         y1 = Math.min(y1, position.y - halfHeight);
@@ -117,25 +114,30 @@ function getPartBox(part, padding)
     return { x1: x1, y1: y1, x2: x2, y2: y2 };
 }
 
+function updateBoxes()
+{
+    if (!layer.moved)
+        return;
+
+    for (const part of layer.parts)
+        part.box = getPartBox(part);
+
+    layer.moved = false;
+}
+
 function paintZone(target, zone, padding, color)
 {
     target.beginPath();
 
     for (const part of zone.parts)
     {
-        const   box = getPartBox(part, padding);
+        const   box = part.box;
 
-        target.rect(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
+        target.rect(box.x1 - padding, box.y1 - padding, box.x2 - box.x1 + 2 * padding, box.y2 - box.y1 + 2 * padding);
     }
 
     target.fillStyle = color;
     target.fill();
-}
-
-function drawZone(target, zone)
-{
-    paintZone(target, zone, 0, zone.color);
-    paintZone(target, zone, ZONE_BORDER, zone.borderColor);
 }
 
 function resizeLayer(width, height, ratio)
@@ -143,64 +145,81 @@ function resizeLayer(width, height, ratio)
     const   pixelWidth = Math.round(width * ratio);
     const   pixelHeight = Math.round(height * ratio);
 
-    if (canvas.width == pixelWidth && canvas.height == pixelHeight)
+    if (layer.canvas.width == pixelWidth && layer.canvas.height == pixelHeight)
         return;
 
-    canvas.width = pixelWidth;
-    canvas.height = pixelHeight;
+    layer.canvas.width = pixelWidth;
+    layer.canvas.height = pixelHeight;
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    layer.canvas.style.width = `${width}px`;
+    layer.canvas.style.height = `${height}px`;
 
-    buffer.width = pixelWidth;
-    buffer.height = pixelHeight;
+    layer.buffer.width = pixelWidth;
+    layer.buffer.height = pixelHeight;
 }
 
 function drawZones()
 {
-    if (canvas == null || app.cy == null)
+    if (layer.canvas == null || app.cy == null)
         return;
 
     const   ratio = window.devicePixelRatio || 1;
+    const   context = layer.context;
+    const   buffer = layer.bufferContext;
 
     resizeLayer(app.cy.width(), app.cy.height(), ratio);
 
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
 
-    if (zones == null)
-        zones = buildZones();
+    if (layer.zones == null)
+        buildZones();
 
-    if (zones.length == 0)
+    if (layer.zones.length == 0)
         return;
+
+    updateBoxes();
 
     const   zoom = app.cy.zoom();
     const   pan = app.cy.pan();
 
-    bufferContext.setTransform(1, 0, 0, 1, 0, 0);
-    bufferContext.clearRect(0, 0, buffer.width, buffer.height);
+    buffer.setTransform(1, 0, 0, 1, 0, 0);
+    buffer.clearRect(0, 0, layer.buffer.width, layer.buffer.height);
 
-    bufferContext.setTransform(ratio * zoom, 0, 0, ratio * zoom, ratio * pan.x, ratio * pan.y);
-    bufferContext.globalCompositeOperation = "destination-over";
+    buffer.setTransform(ratio * zoom, 0, 0, ratio * zoom, ratio * pan.x, ratio * pan.y);
+    buffer.globalCompositeOperation = "destination-over";
 
-    for (const zone of zones)
-        drawZone(bufferContext, zone);
+    for (const zone of layer.zones)
+    {
+        paintZone(buffer, zone, 0, zone.color);
+        paintZone(buffer, zone, ZONE_BORDER, zone.borderColor);
+    }
 
     context.globalAlpha = isDarkTheme() ? ZONE_DARK_OPACITY : ZONE_OPACITY;
-    context.drawImage(buffer, 0, 0);
+    context.drawImage(layer.buffer, 0, 0);
     context.globalAlpha = 1;
 }
 
 export function invalidateZones()
 {
-    zones = null;
+    layer.zones = null;
+    layer.parts = null;
+}
+
+function resetLayer()
+{
+    layer.canvas = null;
+    layer.context = null;
+    layer.buffer = null;
+    layer.bufferContext = null;
+
+    invalidateZones();
 }
 
 export function initZonesLayer()
 {
     const   container = app.cy.container();
-
-    canvas = document.createElement("canvas");
+    const   canvas = document.createElement("canvas");
 
     canvas.style.position = "absolute";
     canvas.style.left = "0";
@@ -210,24 +229,22 @@ export function initZonesLayer()
 
     container.insertBefore(canvas, container.firstChild);
 
-    context = canvas.getContext("2d");
+    layer.canvas = canvas;
+    layer.context = canvas.getContext("2d");
 
-    buffer = document.createElement("canvas");
-    bufferContext = buffer.getContext("2d");
+    layer.buffer = document.createElement("canvas");
+    layer.bufferContext = layer.buffer.getContext("2d");
 
-    zones = null;
+    invalidateZones();
 
     app.cy.on("add remove", invalidateZones);
-    app.cy.on("render resize", drawZones);
+    app.cy.on("position", () => layer.moved = true);
+    app.cy.on("render", drawZones);
 
     app.cy.on("destroy", () =>
     {
         canvas.remove();
 
-        canvas = null;
-        context = null;
-        buffer = null;
-        bufferContext = null;
-        zones = null;
+        resetLayer();
     });
 }

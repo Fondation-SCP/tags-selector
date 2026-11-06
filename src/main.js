@@ -1,6 +1,9 @@
 import { app } from "./state.js";
 import { loadRdf } from "./database/tools.js";
 import { initGraphButtons, loadView } from "./view.js";
+import { updateGraphStyle } from "./graph/init.js";
+import { revealTag } from "./graph/events.js";
+import { changeSelection, clearSelection, deselectTag } from "./graph/selection.js";
 import { initTagsBox } from "./selection/tools.js";
 import { initHistory } from "./selection/history.js";
 import { initSearch } from "./search/tools.js";
@@ -19,7 +22,7 @@ async function main()
 {
     initPopup();
 
-    initTheme();
+    initTheme(updateGraphStyle);
 
     checkLibrary("Comunica", typeof Comunica != "undefined");
     checkLibrary("Cytoscape.js", typeof cytoscape != "undefined");
@@ -29,13 +32,13 @@ async function main()
 
     initLocalRdf();
 
-    initTagsBox();
+    initTagsBox({ clear: clearSelection, deselect: deselectTag, reveal: revealTag });
 
     initGraphButtons();
 
     initSearch();
 
-    initHistory();
+    initHistory(changeSelection);
 
     initRefresh();
 

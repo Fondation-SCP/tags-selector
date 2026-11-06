@@ -1,7 +1,7 @@
-import { updateGraphStyle } from "./graph/init.js";
-
 const   THEME_KEY = "tags-selector-theme";
 const   DARK_QUERY = "(prefers-color-scheme: dark)";
+
+let     onThemeChange = null;
 
 export function isDarkTheme()
 {
@@ -46,7 +46,7 @@ function applyTheme(theme)
     document.documentElement.dataset.theme = theme;
 
     updateThemeButton();
-    updateGraphStyle();
+    onThemeChange();
 }
 
 function toggleTheme()
@@ -57,8 +57,10 @@ function toggleTheme()
     applyTheme(theme);
 }
 
-export function initTheme()
+export function initTheme(onChange)
 {
+    onThemeChange = onChange;
+
     updateThemeButton();
 
     document.getElementById("theme-toggle").addEventListener("click", toggleTheme);

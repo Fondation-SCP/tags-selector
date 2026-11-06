@@ -1,9 +1,10 @@
 import { app } from "./state.js";
-import { buildHierarchy, getUnreachableTags, initGraph } from "./graph/init.js";
+import { buildHierarchy, getUnreachableTags } from "./graph/hierarchy.js";
+import { initGraph } from "./graph/init.js";
 import { registerGraphEvents, collapseAll, expandAll } from "./graph/events.js";
+import { tagPart } from "./graph/disjoint.js";
 import { updateTagsBox } from "./selection/tools.js";
 import { resetHistory } from "./selection/history.js";
-import { getTagName } from "./database/tools.js";
 import { clearPopups, showPopup } from "./popup.js";
 import { hideTagInfo } from "./graph/info.js";
 
@@ -25,7 +26,7 @@ function warnUnreachable()
     const   message = ["Ces tags ne descendent d'aucune racine et n'apparaissent pas dans le graphe :\n"];
 
     for (const url of tags.slice(0, UNREACHABLE_SHOWN))
-        message.push("\n", { italic: getTagName(url) });
+        message.push("\n", tagPart(url));
 
     if (tags.length > UNREACHABLE_SHOWN)
         message.push(`\n… et ${tags.length - UNREACHABLE_SHOWN} autres`);

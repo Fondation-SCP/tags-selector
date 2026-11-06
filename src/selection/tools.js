@@ -1,12 +1,13 @@
 import { app } from "../state.js";
-import { findTag } from "../graph/init.js";
-import { clearSelection, deselectTag, revealTag } from "../graph/events.js";
+import { findTag } from "../graph/hierarchy.js";
 import { getParentsText } from "../graph/info.js";
 import { showPopup } from "../popup.js";
 
 const   COPY_FEEDBACK = 1500;
 
 let     copyTimer = null;
+
+let     actions = null;
 
 function buildChip(name)
 {
@@ -21,7 +22,7 @@ function buildChip(name)
 
     label.textContent = name;
     label.classList.add("clickable");
-    label.addEventListener("click", () => revealTag(url));
+    label.addEventListener("click", () => actions.reveal(url));
 
     if (tooltip != null)
         label.title = tooltip;
@@ -30,7 +31,7 @@ function buildChip(name)
     remove.textContent = "×";
     remove.title = "Retirer de la sélection";
     remove.setAttribute("aria-label", `Retirer ${name} de la sélection`);
-    remove.addEventListener("click", () => deselectTag(url));
+    remove.addEventListener("click", () => actions.deselect(url));
 
     chip.appendChild(label);
     chip.appendChild(remove);
@@ -68,8 +69,10 @@ async function copyTags()
     copyTimer = setTimeout(() => button.textContent = "Copier", COPY_FEEDBACK);
 }
 
-export function initTagsBox()
+export function initTagsBox(handlers)
 {
-    document.getElementById("selected-tags-reset").addEventListener("click", clearSelection);
+    actions = handlers;
+
+    document.getElementById("selected-tags-reset").addEventListener("click", () => actions.clear());
     document.getElementById("selected-tags-copy").addEventListener("click", copyTags);
 }

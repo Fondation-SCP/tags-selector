@@ -1,5 +1,5 @@
 import { app } from "../state.js";
-import { LoadError } from "../loading.js";
+import { LoadError } from "../errors.js";
 
 const   RDF_TIMEOUT = 30000;
 const   RDF_NAMESPACE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";

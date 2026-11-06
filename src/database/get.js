@@ -1,79 +1,22 @@
 import { select } from "./tools.js";
 
-// Renvoie tous les tags
-export function getAll(rdf)
+export function getOntology(rdf)
 {
     return select(`
-        SELECT ?element
+        SELECT DISTINCT ?element ?comment ?parent ?child ?first ?second
         WHERE {
-            ?element a owl:Class .
-        }
-        `, rdf);
-}
+            {
+                ?element a owl:Class .
 
-// Renvoie tous les tags racine
-export function getRoots(rdf)
-{
-    return select(`
-        SELECT DISTINCT ?element
-        WHERE {
-            ?element a owl:Class .
-
-            FILTER NOT EXISTS {
-                ?element rdfs:subClassOf ?root .
+                OPTIONAL {
+                    ?element rdfs:comment ?comment .
+                }
             }
-
-            ?sub rdfs:subClassOf ?element .
-        }
-        `, rdf);
-}
-
-// Renvoie les tags uniques
-export function getUniques(rdf)
-{
-    return select(`
-        SELECT ?element
-        WHERE {
-            ?element a owl:Class .
-
-            FILTER NOT EXISTS {
-                ?element rdfs:subClassOf ?root .
+            UNION
+            {
+                ?child rdfs:subClassOf ?parent .
             }
-
-            FILTER NOT EXISTS {
-                ?sub rdfs:subClassOf ?element .
-            }
-        }
-        `, rdf);
-}
-
-// Renvoie tous les liens entre un tag et ses sous tags
-export function getLinks(rdf)
-{
-    return select(`
-        SELECT DISTINCT ?parent ?child
-        WHERE {
-            ?child rdfs:subClassOf ?parent .
-        }
-        `, rdf);
-}
-
-export function getComments(rdf)
-{
-    return select(`
-        SELECT ?element ?comment
-        WHERE {
-            ?element a owl:Class ;
-                rdfs:comment ?comment .
-        }
-        `, rdf);
-}
-
-export function getDisjoints(rdf)
-{
-    return select(`
-        SELECT DISTINCT ?first ?second
-        WHERE {
+            UNION
             {
                 ?first owl:disjointWith ?second .
             }
@@ -91,7 +34,7 @@ export function getDisjoints(rdf)
                 ?members rdf:rest*/rdf:first ?first .
                 ?members rdf:rest*/rdf:first ?second .
 
-                FILTER (?first != ?second)
+                FILTER (STR(?first) < STR(?second))
             }
         }
         `, rdf);

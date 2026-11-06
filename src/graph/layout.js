@@ -1,7 +1,10 @@
 import { app } from "../state.js";
+import { getChildNodes, getJointId, getRootNodes } from "./nodes.js";
+import { isExpandable } from "./hierarchy.js";
 
 const   CHIP_HALF_WIDTH = 50;
 const   CHIP_HALF_HEIGHT = 26;
+const   CHIP_LABEL_MARGIN = 11;
 const   CHIP_GAP = 12;
 
 const   TRUNK_START = 60;
@@ -29,25 +32,13 @@ const   ZOOM_OUT_LIMIT = 0.5;
 const   FORK_MIN = 20;
 const   FORK_SIZE = 30;
 const   FORK_TRUNK_START = 15;
+const   FIT_PADDING = 80;
+
+let     chipHalfHeight = CHIP_HALF_HEIGHT;
 
 export function getEdgeWidth(depth)
 {
     return Math.max(EDGE_MIN_WIDTH, EDGE_WIDTH - depth * EDGE_TAPER);
-}
-
-export function getChildNodes(node)
-{
-    const   ids = node.data("childIds");
-
-    if (ids == null)
-        return [];
-
-    return ids.map(id => app.cy.getElementById(id));
-}
-
-export function getJointId(ownerId, index)
-{
-    return `${ownerId}|joint|${index}`;
 }
 
 function packRun(items)
@@ -81,7 +72,7 @@ export function buildBranches(urls)
 
     for (const url of urls)
     {
-        if (app.hierarchy.children.has(url))
+        if (isExpandable(url))
         {
             flush();
             items.push({ url: url });
@@ -97,7 +88,7 @@ export function buildBranches(urls)
 
 const   graphAccess =
 {
-    children: node => getChildNodes(node),
+    children: getChildNodes,
     fork: node => node.hasClass("fork")
 };
 
@@ -140,8 +131,8 @@ function getDirection(index, count)
 
 function getMetrics(direction)
 {
-    const   along = CHIP_HALF_WIDTH * Math.abs(direction.x) + CHIP_HALF_HEIGHT * Math.abs(direction.y);
-    const   across = CHIP_HALF_WIDTH * Math.abs(direction.y) + CHIP_HALF_HEIGHT * Math.abs(direction.x);
+    const   along = CHIP_HALF_WIDTH * Math.abs(direction.x) + chipHalfHeight * Math.abs(direction.y);
+    const   across = CHIP_HALF_WIDTH * Math.abs(direction.y) + chipHalfHeight * Math.abs(direction.x);
     const   step = 2 * along + CHIP_GAP;
 
     return {
@@ -357,15 +348,17 @@ function commit(targets, animation)
             && Math.abs(current.y - position.y) < POSITION_EPSILON)
             return;
 
-        const   delay = animation.delays.has(id) ? animation.delays.get(id) : 0;
+        const   delay = animation.delays.get(id) ?? 0;
 
         element.stop(true);
         element.delay(delay).animate({ position: position }, { duration: animation.duration, easing: "ease-out" });
     });
 }
 
-export function initRadius()
+export function initRadius(labelHeight)
 {
+    chipHalfHeight = Math.max(CHIP_HALF_HEIGHT, labelHeight / 2 + CHIP_LABEL_MARGIN);
+
     const   count = app.hierarchy.roots.length;
     const   geometries = app.hierarchy.roots.map((url, index) =>
         measure(buildVirtual(url, new Set()), plainAccess, getMetrics(getDirection(index, count))));
@@ -392,9 +385,9 @@ function updateBounds(targets)
     app.hierarchy.bounds =
     {
         x1: x1 - CHIP_HALF_WIDTH,
-        y1: y1 - CHIP_HALF_HEIGHT,
+        y1: y1 - chipHalfHeight,
         x2: x2 + CHIP_HALF_WIDTH,
-        y2: y2 + CHIP_HALF_HEIGHT
+        y2: y2 + chipHalfHeight
     };
 
     const   bounds = app.hierarchy.bounds;
@@ -406,7 +399,7 @@ function updateBounds(targets)
 
 export function limitPan(pan)
 {
-    const   bounds = app.hierarchy == null ? null : app.hierarchy.bounds;
+    const   bounds = app.hierarchy?.bounds;
 
     if (bounds == null)
         return pan;
@@ -430,7 +423,7 @@ export function clampPan()
 
 export function updateLayout(animation)
 {
-    const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
+    const   roots = getRootNodes();
 
     const   directions = roots.map((node, index) => getDirection(index, roots.length));
     const   geometries = roots.map((node, index) => measure(node, graphAccess, getMetrics(directions[index])));
@@ -460,7 +453,7 @@ export function fitGraph()
 {
     updateLayout();
 
-    app.cy.fit(app.cy.nodes(), 80);
+    app.cy.fit(app.cy.nodes(), FIT_PADDING);
 
     if (app.cy.zoom() > 1)
     {

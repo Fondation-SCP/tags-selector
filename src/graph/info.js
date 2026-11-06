@@ -1,30 +1,55 @@
 import { app } from "../state.js";
 import { getTagName } from "../database/tools.js";
 
-function getAncestorPaths(url, visited)
+function collectPaths(url, seen, trail, paths)
 {
-    const   seen = new Set(visited).add(url);
-    const   parents = (app.hierarchy.parents.get(url) ?? []).filter(parent => !seen.has(parent));
+    seen.add(url);
 
-    return parents.flatMap(parent =>
+    for (const parent of app.hierarchy.parents.get(url) ?? [])
     {
-        const   paths = getAncestorPaths(parent, seen);
+        if (seen.has(parent))
+            continue;
 
-        return paths.length == 0 ? [[parent]] : paths.map(path => [...path, parent]);
-    });
+        const   count = paths.length;
+
+        trail.push(parent);
+
+        collectPaths(parent, seen, trail, paths);
+
+        if (paths.length == count)
+            paths.push([...trail].reverse());
+
+        trail.pop();
+    }
+
+    seen.delete(url);
+}
+
+function buildParentsText(url)
+{
+    const   paths = [];
+
+    collectPaths(url, new Set(), [], paths);
+
+    const   lines = paths.map(path => path.map(getTagName).join(" › "));
+
+    if (lines.length == 0)
+        return null;
+
+    if (lines.length == 1)
+        return `Sous-tag de : ${lines[0]}`;
+
+    return `Sous-tag de :\n${lines.join("\n")}`;
 }
 
 export function getParentsText(url)
 {
-    const   paths = getAncestorPaths(url, []).map(path => path.map(getTagName).join(" › "));
+    const   texts = app.hierarchy.parentsTexts;
 
-    if (paths.length == 0)
-        return null;
+    if (!texts.has(url))
+        texts.set(url, buildParentsText(url));
 
-    if (paths.length == 1)
-        return `Sous-tag de : ${paths[0]}`;
-
-    return `Sous-tag de :\n${paths.join("\n")}`;
+    return texts.get(url);
 }
 
 export function showTagInfo(url)

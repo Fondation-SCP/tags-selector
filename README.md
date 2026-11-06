@@ -21,6 +21,8 @@ L'application tourne entièrement dans le navigateur, sans étape de compilation
 – `src/refresh.js` : rechargement de la page au clic sur le logo ou le titre, après confirmation  
 – `src/theme.js` : bascule entre mode clair et mode sombre (choix sauvegardé dans le `localStorage`, couleurs du graphe et des zones adaptées)  
 – `src/fallback.js` : message d'erreur si les scripts de l'application ne peuvent pas être chargés (page ouverte comme fichier local, par exemple)  
+– `src/errors.js` : erreur de chargement (`LoadError`), affichée en pop up  
+– `src/message.js` : conversion en texte brut des messages des pop up  
 – `src/state.js` : définition de la variable globale `app`  
 – `src/main.js` : création du moteur `Comunica`, de la recherche, des boutons de déploiement, de la boite des tags sélectionnés, de l'historique, du rafraîchissement, du thème et du chargement d'une ontologie locale, puis téléchargement de l'ontologie et chargement de l'affichage  
 

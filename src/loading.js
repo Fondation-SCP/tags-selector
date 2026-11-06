@@ -1,17 +1,6 @@
 import { app } from "./state.js";
 import { showPopup, updateInert } from "./popup.js";
-
-export class LoadError extends Error
-{
-    constructor(title, message, cause)
-    {
-        super(message.map(part => typeof part == "string" ? part : part.italic).join(""), { cause: cause });
-
-        this.name = "LoadError";
-        this.title = title;
-        this.popup = message;
-    }
-}
+import { LoadError } from "./errors.js";
 
 export function checkLibrary(name, loaded)
 {
