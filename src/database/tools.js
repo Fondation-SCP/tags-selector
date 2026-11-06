@@ -1,19 +1,30 @@
-import { app } from "../main.js";
+import { app } from "../state.js";
 import { LoadError } from "../loading.js";
 
 const   RDF_TIMEOUT = 30000;
 const   RDF_NAMESPACE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+
+const   PREFIXES = `
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+    PREFIX rdf: <${RDF_NAMESPACE}>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    `;
 
 export function getTagName(url)
 {
     return url.split("#").pop();
 }
 
-async function downloadRdf()
+export function compareTags(first, second)
+{
+    return getTagName(first).localeCompare(getTagName(second));
+}
+
+async function downloadRdf(url)
 {
     try
     {
-        const   response = await fetch(app.rdfUrl, { signal: AbortSignal.timeout(RDF_TIMEOUT) });
+        const   response = await fetch(url, { signal: AbortSignal.timeout(RDF_TIMEOUT) });
 
         return { response: response, text: await response.text() };
     }
@@ -78,29 +89,30 @@ export function checkRdf(text)
 }
 
 // Téléchargement du .rdf
-// Dissociée de main() pour permettre des appels pendant l'exécution
-export async function loadRdf()
+export async function loadRdf(url)
 {
-    const   { response, text } = await downloadRdf();
+    const   { response, text } = await downloadRdf(url);
 
     checkResponse(response);
     checkRdf(text);
 
-    app.rdf = text;
+    return text;
 }
 
-// Lance une requête SPARQL au .rdf stocké en mémoire
-export async function get(query)
+// Lance une requête SPARQL au .rdf donné et renvoie tous ses résultats
+export async function select(query, rdf)
 {
-    return await app.engine.queryBindings(
-        query,
+    const   stream = await app.engine.queryBindings(
+        PREFIXES + query,
         {
             sources:
             [{
                 type: "serialized",
-                value: app.rdf,
+                value: rdf,
                 mediaType: "application/rdf+xml"
             }]
         }
     );
+
+    return await stream.toArray();
 }

@@ -106,6 +106,9 @@ body
 
 #ontology-source
 {
+    box-sizing: border-box;
+    max-width: min(420px, calc(100vw - 40px));
+
     padding: 4px 8px;
 
     background: var(--source-background);
@@ -116,6 +119,12 @@ body
 
     font-family: sans-serif;
     font-size: 12px;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    pointer-events: auto;
 }
 
 #ontology-source.hidden
@@ -171,6 +180,12 @@ body
     border-color: #aaa;
 }
 
+#search-input:focus-visible
+{
+    outline: 2px solid #aaa;
+    outline-offset: 2px;
+}
+
 #search-results
 {
     position: absolute;
@@ -186,6 +201,8 @@ body
     overflow-y: auto;
 
     list-style: none;
+
+    color-scheme: dark;
 
     background: var(--panel-background);
     color: white;
@@ -218,7 +235,7 @@ body
 
 #search-results li.excluded
 {
-    color: #888;
+    color: #aaa;
 }
 
 #cy
@@ -281,22 +298,77 @@ body
     margin: 0;
 }
 
+#loading-local
+{
+    padding: 6px 16px;
+
+    background: var(--popup-background);
+    color: var(--popup-text);
+
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+
+    font-family: sans-serif;
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+#loading-local:hover
+{
+    background: var(--popup-hover);
+}
+
+#loading-local.hidden
+{
+    display: none;
+}
+
 @keyframes loading-spin
 {
     to { transform: rotate(360deg); }
 }
 
-#selected-tags
+#bottom
 {
     position: fixed;
 
-    bottom: 20px;
     left: 20px;
+    right: 20px;
+    bottom: 20px;
 
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    pointer-events: none;
+}
+
+#bottom-right
+{
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 8px;
+
+    max-width: 100%;
+    margin-left: auto;
+}
+
+#selected-tags
+{
     min-width: 220px;
-    max-width: 350px;
+    max-width: min(350px, calc(100vw - 66px));
 
     padding: 12px;
+
+    color-scheme: dark;
 
     background: var(--panel-background);
     color: white;
@@ -308,6 +380,8 @@ body
 
     font-family: sans-serif;
     font-size: 14px;
+
+    pointer-events: auto;
 }
 
 #selected-tags.hidden
@@ -354,6 +428,15 @@ body
 
 .selected-tag .clickable
 {
+    padding: 0;
+
+    background: none;
+    color: inherit;
+
+    border: none;
+
+    font: inherit;
+
     cursor: pointer;
 }
 
@@ -411,7 +494,9 @@ body
 
     gap: 12px;
 
+    box-sizing: border-box;
     max-width: 380px;
+    max-height: calc(100vh - 32px);
 
     margin: 0 16px;
     padding: 16px 20px;
@@ -448,6 +533,9 @@ body
 #popup-text
 {
     margin: 0;
+
+    min-height: 0;
+    overflow-y: auto;
 
     text-align: left;
     white-space: pre-line;
@@ -525,17 +613,20 @@ body
 
 #tag-info
 {
-    position: fixed;
+    position: absolute;
 
-    bottom: 66px;
-    right: 20px;
+    bottom: calc(100% + 8px);
+    right: 0;
 
     z-index: 5;
 
     box-sizing: border-box;
     width: 260px;
+    max-width: calc(100vw - 40px);
 
     padding: 12px;
+
+    color-scheme: dark;
 
     background: var(--panel-background);
     color: white;
@@ -584,20 +675,19 @@ body
 
 #tag-info-comment.empty
 {
-    color: #999;
+    color: #aaa;
     font-style: italic;
 }
 
 #graph-controls
 {
-    position: fixed;
-
-    bottom: 20px;
-    right: 20px;
-
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 
     gap: 8px;
+
+    pointer-events: auto;
 }
 
 .graph-button

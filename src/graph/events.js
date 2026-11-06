@@ -1,11 +1,11 @@
-import { app } from "../../main.js";
-import { updateTagsBox } from "../../selection/tools.js";
-import { recordSelection } from "../../selection/history.js";
-import { showPopup } from "../../popup.js";
-import { getTagName } from "../../database/tools.js";
+import { app } from "../state.js";
+import { updateTagsBox } from "../selection/tools.js";
+import { recordSelection } from "../selection/history.js";
+import { showPopup } from "../popup.js";
+import { getTagName } from "../database/tools.js";
 import { buildTagNode, getTagPath, getTrunkColor, MISC_TAG } from "./init.js";
-import { buildBranches, clampPan, getChildNodes, getEdgeWidth, getJointId, limitPan, updateBranchesLayout } from "./layout.js";
-import { addAncestors, findConflict, getConflict } from "./disjoint.js";
+import { buildBranches, clampPan, fitGraph, getChildNodes, getEdgeWidth, getJointId, limitPan, updateLayout } from "./layout.js";
+import { addAncestors, findConflict, getClosure, getConflict } from "./disjoint.js";
 import { showTagInfo, hideTagInfo } from "./info.js";
 
 const   ANIMATION_DURATION = 300;
@@ -24,15 +24,6 @@ const   WHEEL_LIMIT = 120;
 function getSelectedUrls()
 {
     return new Set(app.cy.nodes(".tag.selected").map(node => node.data("url")));
-}
-
-function getClosure(urls)
-{
-    const   closure = new Set(urls);
-
-    urls.forEach(url => addAncestors(url, closure));
-
-    return closure;
 }
 
 function updateSelection()
@@ -117,7 +108,7 @@ function createBranches(elements, ownerId, items, depth, position, delays, count
         }
         else
         {
-            const   tag = buildTagNode(childId, item.url, ownerId, index, depth + 1, { x: position.x, y: position.y });
+            const   tag = buildTagNode(childId, item.url, depth + 1, { x: position.x, y: position.y });
 
             tag.data.ownerColor = color;
 
@@ -258,7 +249,7 @@ function applyChange(node, delays, leaving, anchor)
     if (delays.size == 0 && leaving.length == 0)
         return;
 
-    const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+    const   targets = updateLayout({ duration: ANIMATION_DURATION, delays: delays });
     const   target = targets.get(node.id());
     const   zoom = app.cy.zoom();
 
@@ -269,19 +260,6 @@ function applyChange(node, delays, leaving, anchor)
 
     if (leaving.length > 0)
         retract(leaving, target);
-}
-
-function fitGraph()
-{
-    updateBranchesLayout();
-
-    app.cy.fit(app.cy.nodes(), 80);
-
-    if (app.cy.zoom() > 1)
-    {
-        app.cy.zoom(1);
-        app.cy.center(app.cy.nodes());
-    }
 }
 
 export function collapseAll()
@@ -395,7 +373,7 @@ export function changeSelection(urls)
     }
 
     updateSelection();
-    updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+    updateLayout({ duration: ANIMATION_DURATION, delays: delays });
 }
 
 export function deselectTag(url)
@@ -422,7 +400,7 @@ export function revealTag(url)
 
     updateSelection();
 
-    const   targets = updateBranchesLayout({ duration: ANIMATION_DURATION, delays: delays });
+    const   targets = updateLayout({ duration: ANIMATION_DURATION, delays: delays });
     const   target = targets.get(node.id());
     const   zoom = Math.max(app.cy.zoom(), 1);
 
@@ -500,7 +478,7 @@ function registerWheelZoom()
     app.cy.on("destroy", () => container.removeEventListener("wheel", onWheel));
 }
 
-export function registerBranchesEvents()
+export function registerGraphEvents()
 {
     registerWheelZoom();
 

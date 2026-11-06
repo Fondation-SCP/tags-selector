@@ -1,4 +1,4 @@
-import { updateBranchesStyle } from "./graph/branches/init.js";
+import { updateGraphStyle } from "./graph/init.js";
 
 const   THEME_KEY = "tags-selector-theme";
 
@@ -26,6 +26,7 @@ function updateThemeButton()
 
     button.textContent = dark ? "☀\uFE0E" : "☾";
     button.title = dark ? "Passer en mode clair" : "Passer en mode sombre";
+    button.setAttribute("aria-label", button.title);
 }
 
 function toggleTheme()
@@ -37,7 +38,7 @@ function toggleTheme()
     saveTheme(theme);
 
     updateThemeButton();
-    updateBranchesStyle();
+    updateGraphStyle();
 }
 
 export function initTheme()

@@ -1,4 +1,4 @@
-import { app } from "../../main.js";
+import { app } from "../state.js";
 
 const   NODE_SIZE = 40;
 
@@ -133,7 +133,7 @@ function toVirtual(item, path)
     return buildVirtual(item.url, path);
 }
 
-export function getDirection(index, count)
+function getDirection(index, count)
 {
     const   angle = (2 * Math.PI * index) / count - Math.PI / 2;
 
@@ -374,7 +374,7 @@ function commit(targets, animation)
     });
 }
 
-export function initBranchesRadius()
+export function initRadius()
 {
     const   count = app.hierarchy.roots.length;
     const   geometries = app.hierarchy.roots.map((url, index) =>
@@ -438,7 +438,7 @@ export function clampPan()
         app.cy.pan(limited);
 }
 
-export function updateBranchesLayout(animation)
+export function updateLayout(animation)
 {
     const   roots = app.hierarchy.roots.map(id => app.cy.getElementById(id));
 
@@ -464,4 +464,17 @@ export function updateBranchesLayout(animation)
     commit(targets, animation);
 
     return targets;
+}
+
+export function fitGraph()
+{
+    updateLayout();
+
+    app.cy.fit(app.cy.nodes(), 80);
+
+    if (app.cy.zoom() > 1)
+    {
+        app.cy.zoom(1);
+        app.cy.center(app.cy.nodes());
+    }
 }

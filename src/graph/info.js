@@ -1,5 +1,5 @@
-import { app } from "../../main.js";
-import { getTagName } from "../../database/tools.js";
+import { app } from "../state.js";
+import { getTagName } from "../database/tools.js";
 
 function getAncestorPaths(url, visited)
 {

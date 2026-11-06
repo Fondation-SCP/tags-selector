@@ -1,7 +1,7 @@
-import { app } from "../../main.js";
+import { app } from "../state.js";
 import { getChildNodes, getJointId } from "./layout.js";
 import { getThemeColor } from "./init.js";
-import { isDarkTheme } from "../../theme.js";
+import { isDarkTheme } from "../theme.js";
 
 const   ZONE_PADDING = 24;
 const   ZONE_OPACITY = 0.33;

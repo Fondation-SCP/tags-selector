@@ -1,4 +1,5 @@
-import { showPopup } from "./popup.js";
+import { app } from "./state.js";
+import { showPopup, updateInert } from "./popup.js";
 
 export class LoadError extends Error
 {
@@ -18,18 +19,28 @@ export function checkLibrary(name, loaded)
         throw new LoadError("Bibliothèque manquante", ["La bibliothèque ", { italic: name }, " n'a pas pu être chargée depuis son CDN.\n\nVérifiez votre connexion ou un éventuel bloqueur de contenu, puis rechargez la page."]);
 }
 
+export function isLoading()
+{
+    return !document.getElementById("loading-overlay").classList.contains("hidden");
+}
+
 // Affiche l'écran de chargement
 export function showLoading()
 {
     document.getElementById("loading-spinner").classList.remove("hidden");
+    document.getElementById("loading-local").classList.add("hidden");
     document.getElementById("loading-text").textContent = "Chargement de l'ontologie...";
     document.getElementById("loading-overlay").classList.remove("hidden");
+
+    updateInert();
 }
 
 // Cache l'écran de chargement
 export function hideLoading()
 {
     document.getElementById("loading-overlay").classList.add("hidden");
+
+    updateInert();
 }
 
 export function showLoadError(error)
@@ -46,7 +57,11 @@ export function showLoadError(error)
 export function failLoading(error)
 {
     document.getElementById("loading-spinner").classList.add("hidden");
+    document.getElementById("loading-local").classList.toggle("hidden", app.engine == null);
     document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
+    document.getElementById("loading-overlay").classList.remove("hidden");
+
+    updateInert();
 
     showLoadError(error);
 }

@@ -4,23 +4,25 @@ Outil de navigation et de sélection dans l'ontologie des tags de la [Fondation 
 
 L'ontologie est interrogée en `SPARQL` et affichée sous forme de graphe interactif : on y parcourt la hiérarchie des tags, on les recherche et on les sélectionne. Les tags parents sont ajoutés automatiquement à la sélection, et les tags incompatibles (disjoints) sont bloqués.
 
-La sélection se copie au format Wikidot et s'annule (`Ctrl+Z` / `Ctrl+Y`). Le survol d'un tag affiche sa définition (`rdfs:comment`). Une autre ontologie peut être chargée depuis un fichier local (bouton « Charger un .rdf ») ou une URL (`?rdf=…`). Un clic sur le logo ou le titre recharge la page, après confirmation. Un mode sombre s'active depuis le bouton en bas à droite, et le choix est mémorisé par le navigateur.
+La sélection se copie au format Wikidot et s'annule (`Ctrl+Z` / `Ctrl+Y`). Le survol d'un tag affiche sa définition (`rdfs:comment`) et son ascendance ; le survol d'un tag de l'encart de sélection affiche son ascendance, et un clic le montre dans le graphe. Un clic droit sur un tag déploie ou replie ses sous-tags sans le sélectionner. Une autre ontologie peut être chargée depuis un fichier local (bouton « Charger un .rdf », aussi proposé si le téléchargement de l'ontologie échoue) ou une URL (`?rdf=…`) : sa source est alors signalée en bas à droite. Un clic sur le logo ou le titre recharge la page, après confirmation. Un mode sombre s'active depuis le bouton en bas à droite (par défaut, il suit le réglage du système), et le choix est mémorisé par le navigateur.
 
 L'application tourne entièrement dans le navigateur, sans étape de compilation (`Comunica`, `Cytoscape.js`).
 
 ## Hiérarchie
 
-– `src/database/` : interaction avec la base de données (en `SPARQL`), chargement d'une ontologie depuis un fichier local  
-– `src/graph/branches/` : initialisation et interaction avec le graphe en branches (style, construction et placement des branches, événements, zones colorées, déploiement et repli complets, affichage d'un tag recherché, ajout automatique des tags parents, blocage des tags disjoints de la sélection, application d'une sélection complète, panneau de définition d'un tag)  
+– `src/database/` : interaction avec la base de données (en `SPARQL`), téléchargement et vérification du .rdf, chargement d'une ontologie depuis un fichier local  
+– `src/graph/` : initialisation et interaction avec le graphe en branches (construction et validation de la hiérarchie, style, construction et placement des branches, événements, zones colorées, déploiement et repli complets, affichage d'un tag recherché, ajout automatique des tags parents, blocage des tags disjoints de la sélection, application d'une sélection complète, panneau de définition d'un tag)  
 – `src/selection/` : interaction avec la liste de tags sélectionnés (encart interactif, copie au format Wikidot, désélection complète sans repli du graphe, historique annuler / rétablir)  
 – `src/search/` : champ de recherche de tags et menu déroulant des tags les plus proches  
-– `src/views/` : construction de l'affichage (et reconstruction après chargement d'une ontologie locale), boutons de déploiement et de repli du graphe  
 
+– `src/view.js` : construction de l'affichage (et reconstruction après chargement d'une ontologie locale, l'affichage précédent n'étant remplacé que si la nouvelle hiérarchie est valide), avertissement des tags non rattachés, boutons de déploiement et de repli du graphe  
 – `src/loading.js` : affichage, masquage et mise en erreur de l'écran de chargement  
-– `src/popup.js` : pop up avec bouton OK (raison du blocage d'un tag disjoint, tags non rattachés) ou de confirmation, affichées l'une après l'autre si plusieurs arrivent en même temps  
+– `src/popup.js` : pop up avec bouton OK (raison du blocage d'un tag disjoint, tags non rattachés) ou de confirmation, affichées l'une après l'autre si plusieurs arrivent en même temps, page rendue inerte tant qu'une pop up ou l'écran de chargement est affiché  
 – `src/refresh.js` : rechargement de la page au clic sur le logo ou le titre, après confirmation  
 – `src/theme.js` : bascule entre mode clair et mode sombre (choix sauvegardé dans le `localStorage`, couleurs du graphe et des zones adaptées)  
-– `src/main.js` : définition de la variable globale `app`, création de la base de données et du moteur `Comunica` (pour interagir avec), de l'affichage, de la recherche, des boutons de déploiement, de la boite des tags sélectionnés, de l'historique, du rafraîchissement, du thème et du chargement d'une ontologie locale  
+– `src/fallback.js` : message d'erreur si les scripts de l'application ne peuvent pas être chargés (page ouverte comme fichier local, par exemple)  
+– `src/state.js` : définition de la variable globale `app`  
+– `src/main.js` : création du moteur `Comunica`, de la recherche, des boutons de déploiement, de la boite des tags sélectionnés, de l'historique, du rafraîchissement, du thème et du chargement d'une ontologie locale, puis téléchargement de l'ontologie et chargement de l'affichage  
 
 – `resources/ontology/structure-tags.rdf` : ontologie des tags (servie via `Github Pages`)  
 – `resources/scp-logo.svg` : logo affiché dans l'en-tête et sur l'écran de chargement  

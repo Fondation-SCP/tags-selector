@@ -1,5 +1,6 @@
-import { changeSelection } from "../graph/branches/events.js";
+import { changeSelection } from "../graph/events.js";
 import { isPopupOpen } from "../popup.js";
+import { isLoading } from "../loading.js";
 
 const   HISTORY_LIMIT = 100;
 
@@ -60,7 +61,7 @@ function isBusy(target)
     if (target instanceof HTMLInputElement)
         return true;
 
-    return isPopupOpen();
+    return isPopupOpen() || isLoading();
 }
 
 export function initHistory()

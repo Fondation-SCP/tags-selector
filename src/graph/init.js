@@ -1,10 +1,10 @@
-import { app } from "../../main.js";
-import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../../database/get.js";
-import { getTagName } from "../../database/tools.js";
-import { initBranchesRadius, updateBranchesLayout } from "./layout.js";
+import { app } from "../state.js";
+import { getAll, getRoots, getUniques, getLinks, getDisjoints, getComments } from "../database/get.js";
+import { compareTags, getTagName } from "../database/tools.js";
+import { fitGraph, initRadius } from "./layout.js";
 import { initZonesLayer, invalidateZones } from "./zones.js";
-import { LoadError } from "../../loading.js";
-import { isDarkTheme } from "../../theme.js";
+import { LoadError } from "../loading.js";
+import { isDarkTheme } from "../theme.js";
 
 export const   MISC_TAG = "divers";
 
@@ -197,7 +197,7 @@ const   TAG_COLORS =
     }
 };
 
-function getBranchesStyle()
+function getGraphStyle()
 {
     const   colors = isDarkTheme() ? TAG_COLORS.dark : TAG_COLORS.light;
 
@@ -322,7 +322,7 @@ function getBranchesStyle()
     ];
 }
 
-function initBranchesBase()
+function createGraph()
 {
     app.cy = cytoscape({
         container: document.getElementById("cy"),
@@ -333,30 +333,39 @@ function initBranchesBase()
 
         elements: [],
 
-        style: getBranchesStyle()
+        style: getGraphStyle()
     });
 
     initZonesLayer();
 }
 
-export function updateBranchesStyle()
+export function updateGraphStyle()
 {
     if (app.cy == null)
         return;
 
     invalidateZones();
 
-    app.cy.style(getBranchesStyle());
+    app.cy.style(getGraphStyle());
 }
 
-async function initBranchesData()
+export async function buildHierarchy(rdf)
 {
-    const   tags = await getAll();
-    const   roots = await getRoots();
-    const   uniques = await getUniques();
-    const   links = await getLinks();
-    const   disjoints = await getDisjoints();
-    const   comments = await getComments();
+    let     tags;
+
+    try
+    {
+        tags = await getAll(rdf);
+    }
+    catch (error)
+    {
+        throw new LoadError("RDF invalide", ["Le fichier de l'ontologie est un XML valide, mais pas un RDF/XML correct :\n\n", { italic: error.message }], error);
+    }
+
+    if (tags.length == 0)
+        throw new LoadError("Ontologie vide", ["Aucun tag n'a été trouvé : l'ontologie ne déclare aucune classe ", { italic: "owl:Class" }, "."]);
+
+    const   [roots, uniques, links, disjoints, comments] = await Promise.all([getRoots(rdf), getUniques(rdf), getLinks(rdf), getDisjoints(rdf), getComments(rdf)]);
 
     const   known = new Set(tags.map(element => element.get("element").value));
     const   children = new Map();
@@ -406,10 +415,9 @@ async function initBranchesData()
     }
 
     for (const list of children.values())
-        list.sort((first, second) => getTagName(first).localeCompare(getTagName(second)));
+        list.sort(compareTags);
 
-    const   sortByName = (first, second) => getTagName(first).localeCompare(getTagName(second));
-    const   isolated = uniques.map(element => element.get("element").value).sort(sortByName);
+    const   isolated = uniques.map(element => element.get("element").value).sort(compareTags);
     const   list = roots.map(element => element.get("element").value);
 
     // Les tags sans parent ni sous tag sont regroupés sous un tag racine fictif
@@ -422,11 +430,10 @@ async function initBranchesData()
     if (list.length == 0)
         throw new LoadError("Hiérarchie invalide", ["Aucun tag racine n'a été trouvé : chaque tag est déclaré sous-tag d'un autre (cycle de ", { italic: "rdfs:subClassOf" }, " ou parent non déclaré comme ", { italic: "owl:Class" }, ")."]);
 
-    app.hierarchy =
-    {
+    return {
         children: children,
         parents: parents,
-        roots: list.sort(sortByName),
+        roots: list.sort(compareTags),
         tags: [...known],
         urls: urls,
         comments: notes,
@@ -487,15 +494,15 @@ export function getUnreachableTags()
         }
     }
 
-    return app.hierarchy.tags.filter(url => !reached.has(url)).sort((first, second) => getTagName(first).localeCompare(getTagName(second)));
+    return app.hierarchy.tags.filter(url => !reached.has(url)).sort(compareTags);
 }
 
-export function isExpandable(url)
+function isExpandable(url)
 {
     return app.hierarchy.children.has(url);
 }
 
-export function buildTagNode(id, url, owner, order, depth, position)
+export function buildTagNode(id, url, depth, position)
 {
     const   name = getTagName(url);
     const   label = buildLabel(name);
@@ -508,8 +515,6 @@ export function buildTagNode(id, url, owner, order, depth, position)
             wrapped: label.text,
             width: label.width,
             height: label.height,
-            owner: owner,
-            order: order,
             depth: depth
         },
 
@@ -519,32 +524,22 @@ export function buildTagNode(id, url, owner, order, depth, position)
     };
 }
 
-function initBranchesNodes()
+function initNodes()
 {
     const   elements = [];
 
     for (const url of app.hierarchy.roots)
-        elements.push(buildTagNode(url, url, null, 0, 0, { x: 0, y: 0 }));
+        elements.push(buildTagNode(url, url, 0, { x: 0, y: 0 }));
 
     app.cy.add(elements);
 
-    initBranchesRadius();
-    updateBranchesLayout();
-
-    app.cy.fit(app.cy.nodes(), 80);
-
-    if (app.cy.zoom() > 1)
-    {
-        app.cy.zoom(1);
-        app.cy.center(app.cy.nodes());
-    }
+    initRadius();
+    fitGraph();
 }
 
-export async function initBranchesGraph()
+export function initGraph()
 {
-    initBranchesBase();
+    createGraph();
 
-    await initBranchesData();
-
-    initBranchesNodes();
+    initNodes();
 }

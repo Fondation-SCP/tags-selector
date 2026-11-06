@@ -1,29 +1,20 @@
-import { get } from "./tools.js";
+import { select } from "./tools.js";
 
 // Renvoie tous les tags
-export async function getAll()
+export function getAll(rdf)
 {
-    const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-
+    return select(`
         SELECT ?element
         WHERE {
             ?element a owl:Class .
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }
 
 // Renvoie tous les tags racine
-export async function getRoots()
+export function getRoots(rdf)
 {
-    const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
+    return select(`
         SELECT DISTINCT ?element
         WHERE {
             ?element a owl:Class .
@@ -31,23 +22,16 @@ export async function getRoots()
             FILTER NOT EXISTS {
                 ?element rdfs:subClassOf ?root .
             }
-            
+
             ?sub rdfs:subClassOf ?element .
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }
 
 // Renvoie les tags uniques
-export async function getUniques()
+export function getUniques(rdf)
 {
-    const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
+    return select(`
         SELECT ?element
         WHERE {
             ?element a owl:Class .
@@ -55,59 +39,39 @@ export async function getUniques()
             FILTER NOT EXISTS {
                 ?element rdfs:subClassOf ?root .
             }
-            
+
             FILTER NOT EXISTS {
                 ?sub rdfs:subClassOf ?element .
             }
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }
 
 // Renvoie tous les liens entre un tag et ses sous tags
-export async function getLinks()
+export function getLinks(rdf)
 {
-    const   query = `
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
+    return select(`
         SELECT DISTINCT ?parent ?child
         WHERE {
             ?child rdfs:subClassOf ?parent .
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }
 
-export async function getComments()
+export function getComments(rdf)
 {
-    const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
+    return select(`
         SELECT ?element ?comment
         WHERE {
             ?element a owl:Class ;
                 rdfs:comment ?comment .
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }
 
-export async function getDisjoints()
+export function getDisjoints(rdf)
 {
-    const   query = `
-        PREFIX owl: <http://www.w3.org/2002/07/owl#>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
+    return select(`
         SELECT DISTINCT ?first ?second
         WHERE {
             {
@@ -130,9 +94,5 @@ export async function getDisjoints()
                 FILTER (?first != ?second)
             }
         }
-        `;
-
-    const   stream = await get(query);
-
-    return await stream.toArray();
+        `, rdf);
 }

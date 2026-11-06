@@ -1,5 +1,5 @@
-import { app } from "../../main.js";
-import { getTagName } from "../../database/tools.js";
+import { app } from "../state.js";
+import { getTagName } from "../database/tools.js";
 
 export function addAncestors(url, ancestors)
 {
@@ -13,13 +13,13 @@ export function addAncestors(url, ancestors)
     }
 }
 
-function getLineage(url)
+export function getClosure(urls)
 {
-    const   lineage = new Set([url]);
+    const   closure = new Set(urls);
 
-    addAncestors(url, lineage);
+    urls.forEach(url => addAncestors(url, closure));
 
-    return lineage;
+    return closure;
 }
 
 export function findConflict(url, closure)
@@ -27,7 +27,7 @@ export function findConflict(url, closure)
     if (closure.has(url))
         return null;
 
-    const   lineage = getLineage(url);
+    const   lineage = getClosure([url]);
 
     for (const [first, second] of app.hierarchy.disjoints)
     {
@@ -63,16 +63,12 @@ function listTags(urls)
 
 export function getConflict(url, urls)
 {
-    const   closure = new Set(urls);
-
-    urls.forEach(selected => addAncestors(selected, closure));
-
-    const   conflict = findConflict(url, closure);
+    const   conflict = findConflict(url, getClosure(urls));
 
     if (conflict == null)
         return null;
 
-    const   sources = [...urls].filter(selected => getLineage(selected).has(conflict.other));
+    const   sources = [...urls].filter(selected => getClosure([selected]).has(conflict.other));
     const   message = [tag(url), " ne peut pas être sélectionné.\n\n"];
 
     message.push(tag(conflict.own), " et ", tag(conflict.other), " sont incompatibles : une même page ne peut pas porter ces deux tags.");

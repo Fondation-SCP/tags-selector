@@ -1,57 +1,75 @@
 <!DOCTYPE html>
 <html lang="fr">
     <head>
-        <meta charset="UTF8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>tags-selector</title>
 
         <link rel="icon" type="image/gif" href="https://fondationscp.wikidot.com/local--favicon/favicon.gif">
         <link rel="stylesheet" href="style.css">
 
-        <script>try { if (localStorage.getItem("tags-selector-theme") == "dark") document.documentElement.dataset.theme = "dark"; } catch { }</script>
+        <script>{ let theme = null; try { theme = localStorage.getItem("tags-selector-theme"); } catch { } if (theme == "dark" || (theme == null && matchMedia("(prefers-color-scheme: dark)").matches)) document.documentElement.dataset.theme = "dark"; }</script>
     </head>
     <body>
-        <div id="header">
-            <div id="title">
-                <div id="refresh" title="Rafraîchir la page">
-                    <img class="scp-logo" src="resources/scp-logo.svg" alt="">
-                    <h1>tags-selector</h1>
+        <div id="page" inert>
+            <div id="header">
+                <div id="title">
+                    <div id="refresh" role="button" tabindex="0" title="Rafraîchir la page" aria-label="Rafraîchir la page">
+                        <img class="scp-logo" src="resources/scp-logo.svg" alt="">
+                        <h1>tags-selector</h1>
+                    </div>
                 </div>
-                <span id="ontology-source" class="hidden"></span>
+
+                <div id="search">
+                    <input id="search-input" type="text" placeholder="Rechercher un tag..." autocomplete="off" spellcheck="false" aria-label="Rechercher un tag" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
+                    <ul id="search-results" class="hidden" role="listbox" aria-label="Tags trouvés"></ul>
+                </div>
             </div>
 
-            <div id="search">
-                <input id="search-input" type="text" placeholder="Rechercher un tag..." autocomplete="off" spellcheck="false">
-                <ul id="search-results" class="hidden"></ul>
+            <!-- Graphe -->
+            <div id="cy"></div>
+
+            <div id="bottom">
+                <div id="selected-tags" class="hidden">
+                    <h3>Tag(s) sélectionné(s):</h3>
+                    <div id="selected-tags-list"></div>
+                    <div id="selected-tags-actions">
+                        <button id="selected-tags-copy" title="Copier les tags au format Wikidot (séparés par des espaces)" aria-live="polite">Copier</button>
+                        <button id="selected-tags-reset" title="Désélectionner tous les tags sans replier le graphe">Tout désélectionner</button>
+                    </div>
+                </div>
+
+                <div id="bottom-right">
+                    <div id="tag-info" class="hidden">
+                        <h3 id="tag-info-name"></h3>
+                        <p id="tag-info-parents"></p>
+                        <p id="tag-info-comment"></p>
+                    </div>
+
+                    <span id="ontology-source" class="hidden"></span>
+
+                    <div id="graph-controls">
+                        <button id="history-undo" class="graph-button" title="Annuler (Ctrl+Z)" aria-label="Annuler" disabled>↶</button>
+                        <button id="history-redo" class="graph-button" title="Rétablir (Ctrl+Y)" aria-label="Rétablir" disabled>↷</button>
+                        <button id="rdf-open" class="graph-button" title="Remplacer l'ontologie par un fichier local, sans le publier">Charger un .rdf</button>
+                        <button id="graph-expand" class="graph-button">Tout déployer</button>
+                        <button id="graph-collapse" class="graph-button">Tout replier</button>
+                        <button id="theme-toggle" class="graph-button" title="Passer en mode sombre" aria-label="Passer en mode sombre">☾</button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="loading-overlay">
             <div id="loading-box">
                 <img id="loading-spinner" src="resources/scp-logo.svg" alt="">
-                <p id="loading-text">Chargement de l'ontologie...</p>
-            </div>
-        </div>
-
-        <!-- Graphe -->
-        <div id="cy"></div>
-
-        <div id="tag-info" class="hidden">
-            <h3 id="tag-info-name"></h3>
-            <p id="tag-info-parents"></p>
-            <p id="tag-info-comment"></p>
-        </div>
-
-        <div id="selected-tags" class="hidden">
-            <h3 id="selected-tags-title">Aucun tag sélectionné</h3>
-            <div id="selected-tags-list"></div>
-            <div id="selected-tags-actions">
-                <button id="selected-tags-copy" title="Copier les tags au format Wikidot (séparés par des espaces)">Copier</button>
-                <button id="selected-tags-reset" title="Désélectionner tous les tags sans replier le graphe">Tout désélectionner</button>
+                <p id="loading-text" role="status">Chargement de l'ontologie...</p>
+                <button id="loading-local" class="hidden" title="Remplacer l'ontologie par un fichier local, sans le publier">Charger un .rdf local</button>
             </div>
         </div>
 
         <div id="popup-overlay" class="hidden">
-            <div id="popup-box">
+            <div id="popup-box" role="dialog" aria-modal="true" aria-labelledby="popup-title" aria-describedby="popup-text">
                 <div id="popup-header">
                     <img class="scp-logo" src="resources/scp-logo.svg" alt="">
                     <h3 id="popup-title"></h3>
@@ -62,15 +80,6 @@
                     <button id="popup-ok">OK</button>
                 </div>
             </div>
-        </div>
-
-        <div id="graph-controls">
-            <button id="history-undo" class="graph-button" title="Annuler (Ctrl+Z)" disabled>↶</button>
-            <button id="history-redo" class="graph-button" title="Rétablir (Ctrl+Y)" disabled>↷</button>
-            <button id="rdf-open" class="graph-button" title="Remplacer l'ontologie par un fichier local, sans le publier">Charger un .rdf</button>
-            <button id="graph-expand" class="graph-button">Tout déployer</button>
-            <button id="graph-collapse" class="graph-button">Tout replier</button>
-            <button id="theme-toggle" class="graph-button" title="Passer en mode sombre">☾</button>
         </div>
 
         <input id="rdf-input" type="file" accept=".rdf,.owl,.xml" hidden>

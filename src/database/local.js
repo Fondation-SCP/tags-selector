@@ -1,19 +1,25 @@
-import { app, checkOntology, warnUnreachable } from "../main.js";
+import { app } from "../state.js";
 import { checkRdf } from "./tools.js";
-import { loadView } from "../views/tools.js";
+import { loadView } from "../view.js";
 import { failLoading, hideLoading, showLoadError, showLoading } from "../loading.js";
+
+let     loading = false;
 
 export function showOntologySource(text)
 {
     const   label = document.getElementById("ontology-source");
 
     label.textContent = text;
+    label.title = text;
     label.classList.remove("hidden");
 }
 
 async function loadLocalRdf(file)
 {
-    const   previous = app.rdf;
+    if (loading)
+        return;
+
+    loading = true;
 
     showLoading();
 
@@ -23,35 +29,24 @@ async function loadLocalRdf(file)
 
         checkRdf(text);
 
-        app.rdf = text;
+        await loadView(text);
 
-        await checkOntology();
-    }
-    catch (error)
-    {
-        app.rdf = previous;
+        showOntologySource(`Ontologie locale : ${file.name}`);
+
         hideLoading();
-        showLoadError(error);
-        return;
-    }
-
-    try
-    {
-        await loadView();
     }
     catch (error)
     {
-        app.rdf = previous;
-
-        await loadView().catch(failLoading);
-
-        showLoadError(error);
-        return;
+        if (app.cy == null)
+            failLoading(error);
+        else
+        {
+            hideLoading();
+            showLoadError(error);
+        }
     }
 
-    showOntologySource(`Ontologie locale : ${file.name}`);
-
-    warnUnreachable();
+    loading = false;
 }
 
 export function initLocalRdf()
@@ -59,6 +54,7 @@ export function initLocalRdf()
     const   input = document.getElementById("rdf-input");
 
     document.getElementById("rdf-open").addEventListener("click", () => input.click());
+    document.getElementById("loading-local").addEventListener("click", () => input.click());
 
     input.addEventListener("change", () =>
     {

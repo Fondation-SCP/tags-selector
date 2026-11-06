@@ -1,6 +1,6 @@
-import { app } from "../main.js";
+import { app } from "../state.js";
 import { getTagName } from "../database/tools.js";
-import { explainConflict, revealTag } from "../graph/branches/events.js";
+import { explainConflict, revealTag } from "../graph/events.js";
 
 const   MAX_RESULTS = 10;
 
@@ -9,7 +9,10 @@ let     active = -1;
 
 function normalize(text)
 {
-    return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/°/g, "");
+    return text.toLowerCase()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+        .replace(/[\s'’_-]+/g, "-")
+        .replace(/^[-°~!¬]+|-+$/g, "");
 }
 
 function getDistance(first, second)
@@ -60,7 +63,7 @@ function findTags(text)
 {
     const   query = normalize(text.trim());
 
-    if (query.length == 0 || app.hierarchy == null || app.hierarchy.tags == null)
+    if (query.length == 0 || app.hierarchy == null)
         return [];
 
     const   found = [];
@@ -81,12 +84,26 @@ function findTags(text)
     return found.slice(0, MAX_RESULTS);
 }
 
+function updateExpanded()
+{
+    const   input = document.getElementById("search-input");
+
+    input.setAttribute("aria-expanded", results.length > 0 ? "true" : "false");
+
+    if (active >= 0)
+        input.setAttribute("aria-activedescendant", `search-result-${active}`);
+    else
+        input.removeAttribute("aria-activedescendant");
+}
+
 function closeResults()
 {
     results = [];
     active = -1;
 
     document.getElementById("search-results").classList.add("hidden");
+
+    updateExpanded();
 }
 
 function renderResults()
@@ -99,6 +116,10 @@ function renderResults()
     {
         const   item = document.createElement("li");
         const   conflict = explainConflict(result.url);
+
+        item.id = `search-result-${index}`;
+        item.setAttribute("role", "option");
+        item.setAttribute("aria-selected", index == active ? "true" : "false");
 
         item.textContent = result.name;
         item.classList.toggle("active", index == active);
@@ -123,6 +144,8 @@ function renderResults()
     });
 
     list.classList.toggle("hidden", results.length == 0);
+
+    updateExpanded();
 }
 
 function setActive(index)
@@ -131,10 +154,16 @@ function setActive(index)
 
     const   items = document.querySelectorAll("#search-results li");
 
-    items.forEach((item, position) => item.classList.toggle("active", position == active));
+    items.forEach((item, position) =>
+    {
+        item.classList.toggle("active", position == active);
+        item.setAttribute("aria-selected", position == active ? "true" : "false");
+    });
 
     if (active >= 0)
         items[active].scrollIntoView({ block: "nearest" });
+
+    updateExpanded();
 }
 
 function updateResults()
