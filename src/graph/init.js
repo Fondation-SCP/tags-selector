@@ -184,6 +184,12 @@ const   TAG_COLORS =
         border: "#555",
         expandableBorder: "#333",
         implied: "#9fd49f",
+        selected: "green",
+        selectedText: "white",
+        excluded: "#e53935",
+        excludedText: "white",
+        highlight: "#ffc400",
+        conflict: "#e53935",
         excludedBorder: "black"
     },
     dark:
@@ -193,6 +199,12 @@ const   TAG_COLORS =
         border: "#8a8a8a",
         expandableBorder: "#c8c8c8",
         implied: "#2f5d34",
+        selected: "green",
+        selectedText: "white",
+        excluded: "#e53935",
+        excludedText: "white",
+        highlight: "#ffc400",
+        conflict: "#e53935",
         excludedBorder: "#ddd"
     }
 };
@@ -243,8 +255,8 @@ function getGraphStyle()
             selector: "node.selected",
             style:
             {
-                "background-color": "green",
-                color: "white"
+                "background-color": colors.selected,
+                color: colors.selectedText
             }
         },
         {
@@ -259,16 +271,16 @@ function getGraphStyle()
             style:
             {
                 opacity: 0.75,
-                "background-color": "#e53935",
+                "background-color": colors.excluded,
                 "border-color": colors.excludedBorder,
-                color: "white"
+                color: colors.excludedText
             }
         },
         {
             selector: "node.highlighted",
             style:
             {
-                "underlay-color": "#ffc400",
+                "underlay-color": colors.highlight,
                 "underlay-opacity": 0.8,
                 "underlay-padding": 8,
                 "underlay-shape": "round-rectangle"
@@ -278,7 +290,7 @@ function getGraphStyle()
             selector: "node.conflict",
             style:
             {
-                "underlay-color": "#e53935",
+                "underlay-color": colors.conflict,
                 "underlay-opacity": 0.8,
                 "underlay-padding": 8,
                 "underlay-shape": "round-rectangle"

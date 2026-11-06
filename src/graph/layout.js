@@ -1,7 +1,5 @@
 import { app } from "../state.js";
 
-const   NODE_SIZE = 40;
-
 const   CHIP_HALF_WIDTH = 50;
 const   CHIP_HALF_HEIGHT = 26;
 const   CHIP_GAP = 12;
@@ -336,14 +334,6 @@ function getRadius(geometries, ringRadius)
     return radius;
 }
 
-function getCircleRadius(count, step)
-{
-    if (count <= 1)
-        return 0;
-
-    return Math.max(NODE_SIZE, (count * step) / (2 * Math.PI));
-}
-
 function commit(targets, animation)
 {
     if (animation == null)
@@ -380,7 +370,7 @@ export function initRadius()
     const   geometries = app.hierarchy.roots.map((url, index) =>
         measure(buildVirtual(url, new Set()), plainAccess, getMetrics(getDirection(index, count))));
 
-    app.hierarchy.ringRadius = Math.max(RING_MIN_RADIUS, getCircleRadius(count, RING_STEP));
+    app.hierarchy.ringRadius = Math.max(RING_MIN_RADIUS, count * RING_STEP / (2 * Math.PI));
     app.hierarchy.radius = getRadius(geometries, app.hierarchy.ringRadius);
 }
 
@@ -446,7 +436,7 @@ export function updateLayout(animation)
     const   geometries = roots.map((node, index) => measure(node, graphAccess, getMetrics(directions[index])));
 
     const   radius = app.hierarchy.radius;
-    const   rootRadius = Math.min(radius, app.hierarchy.ringRadius);
+    const   rootRadius = app.hierarchy.ringRadius;
 
     const   targets = new Map();
 

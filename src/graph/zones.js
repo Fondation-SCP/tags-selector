@@ -23,9 +23,6 @@ let     zones = null;
 
 function shadeColor(color, amount)
 {
-    if (typeof color != "string" || color[0] != "#")
-        return color;
-
     const   value = parseInt(color.slice(1), 16);
 
     const   mix = (channel) => amount < 0

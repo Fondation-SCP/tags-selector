@@ -1,13 +1,21 @@
 :root
 {
+    color-scheme: light;
+
     --page-background: white;
     --page-text: black;
     --loading-text: #333;
 
     --panel-background: rgba(40, 40, 40, 0.95);
     --panel-hover: rgba(70, 70, 70, 0.95);
+    --panel-highlight: rgba(255, 255, 255, 0.15);
     --panel-border: #666;
     --panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --panel-text: white;
+    --panel-muted: #aaa;
+    --panel-subtle: #bbb;
+
+    --selected-tag: green;
 
     --popup-overlay: rgba(0, 0, 0, 0.25);
     --popup-background: white;
@@ -59,6 +67,34 @@ body
 {
     background: var(--page-background);
     color: var(--page-text);
+
+    font-family: sans-serif;
+}
+
+button, input
+{
+    font-family: inherit;
+}
+
+.hidden
+{
+    display: none !important;
+}
+
+#search-input, #search-results, #selected-tags, #tag-info, .graph-button
+{
+    background: var(--panel-background);
+    color: var(--panel-text);
+
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+
+    box-shadow: var(--panel-shadow);
+}
+
+#search-results, #selected-tags, #tag-info
+{
+    color-scheme: dark;
 }
 
 #header
@@ -82,10 +118,9 @@ body
 
 #title
 {
-    display: flex;
-    align-items: center;
+    margin: 0;
 
-    gap: 12px;
+    font-family: serif;
 }
 
 #refresh
@@ -95,13 +130,17 @@ body
 
     gap: 12px;
 
+    padding: 0;
+
+    background: none;
+    color: inherit;
+
+    border: none;
+
+    font: inherit;
+
     pointer-events: auto;
     cursor: pointer;
-}
-
-#title h1
-{
-    margin: 0;
 }
 
 #ontology-source
@@ -117,7 +156,6 @@ body
     border: 1px solid var(--source-border);
     border-radius: 6px;
 
-    font-family: sans-serif;
     font-size: 12px;
 
     overflow: hidden;
@@ -125,11 +163,6 @@ body
     text-overflow: ellipsis;
 
     pointer-events: auto;
-}
-
-#ontology-source.hidden
-{
-    display: none;
 }
 
 .scp-logo
@@ -144,7 +177,7 @@ body
 {
     position: relative;
 
-    width: 260px;
+    width: min(260px, 50vw);
 
     pointer-events: auto;
 }
@@ -156,15 +189,6 @@ body
 
     padding: 8px 12px;
 
-    background: var(--panel-background);
-    color: white;
-
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-
-    box-shadow: var(--panel-shadow);
-
-    font-family: sans-serif;
     font-size: 14px;
 
     outline: none;
@@ -172,17 +196,17 @@ body
 
 #search-input::placeholder
 {
-    color: #aaa;
+    color: var(--panel-muted);
 }
 
 #search-input:focus
 {
-    border-color: #aaa;
+    border-color: var(--panel-muted);
 }
 
 #search-input:focus-visible
 {
-    outline: 2px solid #aaa;
+    outline: 2px solid var(--panel-muted);
     outline-offset: 2px;
 }
 
@@ -197,28 +221,12 @@ body
     margin: 4px 0 0 0;
     padding: 4px 0;
 
-    max-height: 50vh;
+    max-height: 50dvh;
     overflow-y: auto;
 
     list-style: none;
 
-    color-scheme: dark;
-
-    background: var(--panel-background);
-    color: white;
-
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-
-    box-shadow: var(--panel-shadow);
-
-    font-family: sans-serif;
     font-size: 14px;
-}
-
-#search-results.hidden
-{
-    display: none;
 }
 
 #search-results li
@@ -230,12 +238,12 @@ body
 
 #search-results li.active
 {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--panel-highlight);
 }
 
 #search-results li.excluded
 {
-    color: #aaa;
+    color: var(--panel-muted);
 }
 
 #cy
@@ -260,11 +268,6 @@ body
     background: var(--page-background);
 }
 
-#loading-overlay.hidden
-{
-    display: none;
-}
-
 #loading-box
 {
     display: flex;
@@ -273,7 +276,6 @@ body
 
     gap: 12px;
 
-    font-family: sans-serif;
     font-size: 14px;
     color: var(--loading-text);
 }
@@ -288,19 +290,14 @@ body
     animation: loading-spin 2s linear infinite;
 }
 
-#loading-spinner.hidden
-{
-    display: none;
-}
-
 #loading-text
 {
     margin: 0;
 }
 
-#loading-local
+#loading-local, #popup-ok, #popup-cancel
 {
-    padding: 6px 16px;
+    padding: 6px 24px;
 
     background: var(--popup-background);
     color: var(--popup-text);
@@ -308,20 +305,19 @@ body
     border: 1px solid var(--panel-border);
     border-radius: 6px;
 
-    font-family: sans-serif;
     font-size: 13px;
 
     cursor: pointer;
 }
 
-#loading-local:hover
+#loading-local
 {
-    background: var(--popup-hover);
+    padding: 6px 16px;
 }
 
-#loading-local.hidden
+#loading-local:hover, #popup-ok:hover, #popup-cancel:hover
 {
-    display: none;
+    background: var(--popup-hover);
 }
 
 @keyframes loading-spin
@@ -363,33 +359,18 @@ body
 
 #selected-tags
 {
-    min-width: 220px;
-    max-width: min(350px, calc(100vw - 66px));
+    box-sizing: border-box;
+    min-width: 246px;
+    max-width: min(376px, calc(100vw - 40px));
 
     padding: 12px;
 
-    color-scheme: dark;
-
-    background: var(--panel-background);
-    color: white;
-
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-
-    box-shadow: var(--panel-shadow);
-
-    font-family: sans-serif;
     font-size: 14px;
 
     pointer-events: auto;
 }
 
-#selected-tags.hidden
-{
-    display: none;
-}
-
-#selected-tags h3
+#selected-tags h2
 {
     margin: 0 0 10px 0;
     font-size: 16px;
@@ -404,7 +385,7 @@ body
 
     margin: 0;
 
-    max-height: 30vh;
+    max-height: 30dvh;
     overflow-y: auto;
 }
 
@@ -417,8 +398,8 @@ body
 
     padding: 2px 8px;
 
-    background: green;
-    color: white;
+    background: var(--selected-tag);
+    color: var(--panel-text);
 
     border: 1px solid transparent;
     border-radius: 10px;
@@ -454,6 +435,7 @@ body
 
     border: none;
 
+    font: inherit;
     font-size: 14px;
     line-height: 1;
 
@@ -481,11 +463,6 @@ body
     background: var(--popup-overlay);
 }
 
-#popup-overlay.hidden
-{
-    display: none;
-}
-
 #popup-box
 {
     display: flex;
@@ -496,7 +473,7 @@ body
 
     box-sizing: border-box;
     max-width: 380px;
-    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
 
     margin: 0 16px;
     padding: 16px 20px;
@@ -509,7 +486,6 @@ body
 
     box-shadow: var(--panel-shadow);
 
-    font-family: sans-serif;
     font-size: 14px;
 
     text-align: center;
@@ -554,32 +530,6 @@ body
     gap: 8px;
 }
 
-#popup-ok, #popup-cancel
-{
-    padding: 6px 24px;
-
-    background: var(--popup-background);
-    color: var(--popup-text);
-
-    border: 1px solid var(--panel-border);
-    border-radius: 6px;
-
-    font-family: sans-serif;
-    font-size: 13px;
-
-    cursor: pointer;
-}
-
-#popup-ok:hover, #popup-cancel:hover
-{
-    background: var(--popup-hover);
-}
-
-#popup-cancel.hidden
-{
-    display: none;
-}
-
 #selected-tags-actions
 {
     display: flex;
@@ -596,11 +546,10 @@ body
     padding: 6px;
 
     background: transparent;
-    color: white;
+    color: var(--panel-text);
 
     border: 1px solid var(--panel-border);
 
-    font-family: sans-serif;
     font-size: 13px;
 
     cursor: pointer;
@@ -608,7 +557,7 @@ body
 
 #selected-tags-actions button:hover
 {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--panel-highlight);
 }
 
 #tag-info
@@ -626,25 +575,7 @@ body
 
     padding: 12px;
 
-    color-scheme: dark;
-
-    background: var(--panel-background);
-    color: white;
-
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-
-    box-shadow: var(--panel-shadow);
-
-    font-family: sans-serif;
     font-size: 13px;
-
-    pointer-events: none;
-}
-
-#tag-info.hidden
-{
-    display: none;
 }
 
 #tag-info-name
@@ -665,17 +596,12 @@ body
 
 #tag-info-parents
 {
-    color: #bbb;
-}
-
-#tag-info-parents.hidden
-{
-    display: none;
+    color: var(--panel-subtle);
 }
 
 #tag-info-comment.empty
 {
-    color: #aaa;
+    color: var(--panel-muted);
     font-style: italic;
 }
 
@@ -694,21 +620,12 @@ body
 {
     padding: 8px 12px;
 
-    background: var(--panel-background);
-    color: white;
-
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-
-    box-shadow: var(--panel-shadow);
-
-    font-family: sans-serif;
     font-size: 13px;
 
     cursor: pointer;
 }
 
-.graph-button:hover
+.graph-button:not(:disabled):hover
 {
     background: var(--panel-hover);
 }
@@ -718,11 +635,6 @@ body
     opacity: 0.4;
 
     cursor: default;
-}
-
-.graph-button:disabled:hover
-{
-    background: var(--panel-background);
 }
 
 #theme-toggle

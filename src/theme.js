@@ -1,10 +1,23 @@
 import { updateGraphStyle } from "./graph/init.js";
 
 const   THEME_KEY = "tags-selector-theme";
+const   DARK_QUERY = "(prefers-color-scheme: dark)";
 
 export function isDarkTheme()
 {
     return document.documentElement.dataset.theme == "dark";
+}
+
+function loadTheme()
+{
+    try
+    {
+        return localStorage.getItem(THEME_KEY);
+    }
+    catch
+    {
+        return null;
+    }
 }
 
 function saveTheme(theme)
@@ -15,7 +28,6 @@ function saveTheme(theme)
     }
     catch
     {
-        return;
     }
 }
 
@@ -29,16 +41,20 @@ function updateThemeButton()
     button.setAttribute("aria-label", button.title);
 }
 
+function applyTheme(theme)
+{
+    document.documentElement.dataset.theme = theme;
+
+    updateThemeButton();
+    updateGraphStyle();
+}
+
 function toggleTheme()
 {
     const   theme = isDarkTheme() ? "light" : "dark";
 
-    document.documentElement.dataset.theme = theme;
-
     saveTheme(theme);
-
-    updateThemeButton();
-    updateGraphStyle();
+    applyTheme(theme);
 }
 
 export function initTheme()
@@ -46,4 +62,10 @@ export function initTheme()
     updateThemeButton();
 
     document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+
+    matchMedia(DARK_QUERY).addEventListener("change", (event) =>
+    {
+        if (loadTheme() == null)
+            applyTheme(event.matches ? "dark" : "light");
+    });
 }

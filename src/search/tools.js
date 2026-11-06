@@ -10,7 +10,7 @@ let     active = -1;
 function normalize(text)
 {
     return text.toLowerCase()
-        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
         .replace(/[\s'’_-]+/g, "-")
         .replace(/^[-°~!¬]+|-+$/g, "");
 }
@@ -44,7 +44,7 @@ function getScore(name, query)
     if (name.startsWith(query))
         return 1;
 
-    if (name.split(/[-_ ]/).some(part => part.startsWith(query)))
+    if (name.split("-").some(part => part.startsWith(query)))
         return 2;
 
     if (name.includes(query))
@@ -61,7 +61,7 @@ function getScore(name, query)
 
 function findTags(text)
 {
-    const   query = normalize(text.trim());
+    const   query = normalize(text);
 
     if (query.length == 0 || app.hierarchy == null)
         return [];

@@ -114,5 +114,5 @@ export async function select(query, rdf)
         }
     );
 
-    return await stream.toArray();
+    return stream.toArray();
 }

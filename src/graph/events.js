@@ -482,17 +482,7 @@ export function registerGraphEvents()
 {
     registerWheelZoom();
 
-    let     clamping = false;
-
-    app.cy.on("viewport", () =>
-    {
-        if (clamping)
-            return;
-
-        clamping = true;
-        clampPan();
-        clamping = false;
-    });
+    app.cy.on("viewport", clampPan);
 
     app.cy.on("mouseover", "node.tag", (event) =>
     {

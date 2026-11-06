@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
         <title>tags-selector</title>
 
         <link rel="icon" type="image/gif" href="https://fondationscp.wikidot.com/local--favicon/favicon.gif">
@@ -13,12 +14,12 @@
     <body>
         <div id="page" inert>
             <div id="header">
-                <div id="title">
-                    <div id="refresh" role="button" tabindex="0" title="Rafraîchir la page" aria-label="Rafraîchir la page">
+                <h1 id="title">
+                    <button id="refresh" title="Rafraîchir la page">
                         <img class="scp-logo" src="resources/scp-logo.svg" alt="">
-                        <h1>tags-selector</h1>
-                    </div>
-                </div>
+                        tags-selector
+                    </button>
+                </h1>
 
                 <div id="search">
                     <input id="search-input" type="text" placeholder="Rechercher un tag..." autocomplete="off" spellcheck="false" aria-label="Rechercher un tag" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results">
@@ -31,7 +32,7 @@
 
             <div id="bottom">
                 <div id="selected-tags" class="hidden">
-                    <h3>Tag(s) sélectionné(s):</h3>
+                    <h2>Tag(s) sélectionné(s):</h2>
                     <div id="selected-tags-list"></div>
                     <div id="selected-tags-actions">
                         <button id="selected-tags-copy" title="Copier les tags au format Wikidot (séparés par des espaces)" aria-live="polite">Copier</button>
@@ -41,7 +42,7 @@
 
                 <div id="bottom-right">
                     <div id="tag-info" class="hidden">
-                        <h3 id="tag-info-name"></h3>
+                        <h2 id="tag-info-name"></h2>
                         <p id="tag-info-parents"></p>
                         <p id="tag-info-comment"></p>
                     </div>
@@ -72,7 +73,7 @@
             <div id="popup-box" role="dialog" aria-modal="true" aria-labelledby="popup-title" aria-describedby="popup-text">
                 <div id="popup-header">
                     <img class="scp-logo" src="resources/scp-logo.svg" alt="">
-                    <h3 id="popup-title"></h3>
+                    <h2 id="popup-title"></h2>
                 </div>
                 <p id="popup-text"></p>
                 <div id="popup-buttons">
@@ -85,10 +86,10 @@
         <input id="rdf-input" type="file" accept=".rdf,.owl,.xml" hidden>
 
         <!-- Comunica -->
-        <script src="https://rdf.js.org/comunica-browser/versions/v4/engines/query-sparql/comunica-browser.js"></script>
+        <script src="https://rdf.js.org/comunica-browser/versions/v4.5.0/engines/query-sparql/comunica-browser.js" integrity="sha384-No4nYA1QyaT7s2XHhYFhIBHPj+A7ktUUv+7hbaS/EGgkQRyGDy/UBxPxugbWXjMZ" crossorigin="anonymous"></script>
 
         <!-- Cytoscape.js -->
-        <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.33.1/dist/cytoscape.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.33.1/dist/cytoscape.min.js" integrity="sha384-lXrzMjLDk3q9l0I/kjqjMcDgfFnHvWTDeWP3DmMqoeOq49/qa8drmlP3OBWN9dQ3" crossorigin="anonymous"></script>
 
         <script src="src/fallback.js"></script>
         <script type="module" src="src/main.js" onerror="failScripts()"></script>

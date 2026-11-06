@@ -21,6 +21,8 @@ async function loadLocalRdf(file)
 
     loading = true;
 
+    const   trigger = document.activeElement;
+
     showLoading();
 
     try
@@ -34,6 +36,8 @@ async function loadLocalRdf(file)
         showOntologySource(`Ontologie locale : ${file.name}`);
 
         hideLoading();
+
+        trigger?.focus();
     }
     catch (error)
     {
@@ -42,6 +46,9 @@ async function loadLocalRdf(file)
         else
         {
             hideLoading();
+
+            trigger?.focus();
+
             showLoadError(error);
         }
     }

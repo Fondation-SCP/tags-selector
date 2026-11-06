@@ -56,12 +56,17 @@ export function showLoadError(error)
 // Remplace l'écran de chargement par un message d'erreur
 export function failLoading(error)
 {
+    const   local = document.getElementById("loading-local");
+
     document.getElementById("loading-spinner").classList.add("hidden");
-    document.getElementById("loading-local").classList.toggle("hidden", app.engine == null);
+    local.classList.toggle("hidden", app.engine == null);
     document.getElementById("loading-text").textContent = "Échec du chargement de l'ontologie.";
     document.getElementById("loading-overlay").classList.remove("hidden");
 
     updateInert();
+
+    if (app.engine != null)
+        local.focus();
 
     showLoadError(error);
 }
