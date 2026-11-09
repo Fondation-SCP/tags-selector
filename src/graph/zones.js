@@ -17,8 +17,6 @@ const   layer =
 {
     canvas: null,
     context: null,
-    buffer: null,
-    bufferContext: null,
     zones: null,
     parts: null,
     moved: true
@@ -85,9 +83,11 @@ function buildZones()
             if (root.length > 0)
                 collectZones(root, zones, parts);
 
-    layer.zones = zones.sort((first, second) => second.order - first.order);
+    layer.zones = zones.sort((first, second) => first.order - second.order);
     layer.parts = parts;
     layer.moved = true;
+
+    layer.canvas.style.opacity = isDarkTheme() ? ZONE_DARK_OPACITY : ZONE_OPACITY;
 }
 
 function getPartBox(part)
@@ -125,13 +125,22 @@ function updateBoxes()
     layer.moved = false;
 }
 
-function paintZone(target, zone, padding, color)
+function isOutside(box, padding, view)
+{
+    return box.x2 + padding < view.x1 || box.x1 - padding > view.x2
+        || box.y2 + padding < view.y1 || box.y1 - padding > view.y2;
+}
+
+function paintZone(target, zone, padding, color, view)
 {
     target.beginPath();
 
     for (const part of zone.parts)
     {
         const   box = part.box;
+
+        if (isOutside(box, padding, view))
+            continue;
 
         target.rect(box.x1 - padding, box.y1 - padding, box.x2 - box.x1 + 2 * padding, box.y2 - box.y1 + 2 * padding);
     }
@@ -140,22 +149,16 @@ function paintZone(target, zone, padding, color)
     target.fill();
 }
 
-function resizeLayer(width, height, ratio)
+function resizeLayer(width, height)
 {
-    const   pixelWidth = Math.round(width * ratio);
-    const   pixelHeight = Math.round(height * ratio);
-
-    if (layer.canvas.width == pixelWidth && layer.canvas.height == pixelHeight)
+    if (layer.canvas.width == width && layer.canvas.height == height)
         return;
 
-    layer.canvas.width = pixelWidth;
-    layer.canvas.height = pixelHeight;
+    layer.canvas.width = width;
+    layer.canvas.height = height;
 
     layer.canvas.style.width = `${width}px`;
     layer.canvas.style.height = `${height}px`;
-
-    layer.buffer.width = pixelWidth;
-    layer.buffer.height = pixelHeight;
 }
 
 function drawZones()
@@ -163,14 +166,14 @@ function drawZones()
     if (layer.canvas == null || app.cy == null)
         return;
 
-    const   ratio = window.devicePixelRatio || 1;
     const   context = layer.context;
-    const   buffer = layer.bufferContext;
+    const   width = Math.round(app.cy.width());
+    const   height = Math.round(app.cy.height());
 
-    resizeLayer(app.cy.width(), app.cy.height(), ratio);
+    resizeLayer(width, height);
 
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
+    context.clearRect(0, 0, width, height);
 
     if (layer.zones == null)
         buildZones();
@@ -183,21 +186,21 @@ function drawZones()
     const   zoom = app.cy.zoom();
     const   pan = app.cy.pan();
 
-    buffer.setTransform(1, 0, 0, 1, 0, 0);
-    buffer.clearRect(0, 0, layer.buffer.width, layer.buffer.height);
+    const   view =
+    {
+        x1: -pan.x / zoom,
+        y1: -pan.y / zoom,
+        x2: (width - pan.x) / zoom,
+        y2: (height - pan.y) / zoom
+    };
 
-    buffer.setTransform(ratio * zoom, 0, 0, ratio * zoom, ratio * pan.x, ratio * pan.y);
-    buffer.globalCompositeOperation = "destination-over";
+    context.setTransform(zoom, 0, 0, zoom, pan.x, pan.y);
 
     for (const zone of layer.zones)
     {
-        paintZone(buffer, zone, 0, zone.color);
-        paintZone(buffer, zone, ZONE_BORDER, zone.borderColor);
+        paintZone(context, zone, ZONE_BORDER, zone.borderColor, view);
+        paintZone(context, zone, 0, zone.color, view);
     }
-
-    context.globalAlpha = isDarkTheme() ? ZONE_DARK_OPACITY : ZONE_OPACITY;
-    context.drawImage(layer.buffer, 0, 0);
-    context.globalAlpha = 1;
 }
 
 export function invalidateZones()
@@ -210,8 +213,6 @@ function resetLayer()
 {
     layer.canvas = null;
     layer.context = null;
-    layer.buffer = null;
-    layer.bufferContext = null;
 
     invalidateZones();
 }
@@ -231,9 +232,6 @@ export function initZonesLayer()
 
     layer.canvas = canvas;
     layer.context = canvas.getContext("2d");
-
-    layer.buffer = document.createElement("canvas");
-    layer.bufferContext = layer.buffer.getContext("2d");
 
     invalidateZones();
 

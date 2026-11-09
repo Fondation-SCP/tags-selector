@@ -208,13 +208,10 @@ function getGraphStyle()
             selector: "node.joint, node.fork",
             style:
             {
-                label: "",
+                visibility: "hidden",
 
                 width: 1,
                 height: 1,
-
-                "background-opacity": 0,
-                "border-width": 0,
 
                 events: "no"
             }
